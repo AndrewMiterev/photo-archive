@@ -82,13 +82,15 @@ public class ManualView extends VerticalLayout {
 		Video video = new BlobSourceVideo();
 		video.getStyle()
 				.set("object-fit", "contain")
-				.set("width", "300px")
+				.set("width", "100%")
+				.set("height", "100%")
+//				.set("width", "300px")
 //				.set("height", "100%")
 		;
 		video.setControls(true);
-		imageDiv.add(image);
+		imageDiv.add(image,video);
 		var imageDescription = new VerticalLayout();
-		photoCard.add(imageDiv, video, imageDescription);
+		photoCard.add(imageDiv, imageDescription);
 
 		var originalPhotoNameText = new Label("Original photo name");
 		var originalPhotoNameSpan = new Span();
@@ -107,13 +109,19 @@ public class ManualView extends VerticalLayout {
 		imageDescription.add(new HorizontalLayout(originalPhotoDateText, originalPhotoDateSpan));
 
 		consumer = (stream, photo) -> getUI().ifPresent(ui -> ui.access(() -> {
-			if(photo.getOriginal().getMime().equalsIgnoreCase("video/quicktime"))
+			video.getStyle().set("display","none");
+			image.getStyle().set("display","none");
+
+			if(photo.getOriginal().getMime().equalsIgnoreCase("video/quicktime")) {
+				video.getStyle().set("display", "block");
 				video.setSource(stream);
-			else
-			image.getElement().setAttribute("src", stream)
-					.setAttribute("alt", photo.getName())
-					.setAttribute("title", photo.getName())
-			;
+			} else {
+				image.getStyle().set("display","block");
+				image.getElement().setAttribute("src", stream)
+						.setAttribute("alt", photo.getName())
+						.setAttribute("title", photo.getName())
+				;
+			}
 			originalPhotoNameSpan.setText(photo.getOriginal().getName());
 			originalPhotoSourceSpan.setText(photo.getOriginal().getSource());
 			originalPhotoMimeSpan.setText(photo.getOriginal().getMime());
