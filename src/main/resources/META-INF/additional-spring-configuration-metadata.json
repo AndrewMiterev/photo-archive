@@ -1,0 +1,44 @@
+{
+  "properties": [
+    {
+      "name": "photo-archive.in-folder",
+      "type": "java.lang.String",
+      "description": "folder for storing all input files"
+    },
+    {
+      "name": "photo-archive.duplicate-folder",
+      "type": "java.lang.String",
+      "description": "folder for storing files with same hash"
+    },
+    {
+      "name": "photo-archive.processing-folder",
+      "type": "java.lang.String",
+      "description": "folder for storing files for processing"
+    },
+    {
+      "name": "photo-archive.manual-folder",
+      "type": "java.lang.String",
+      "description": "folder for storing files without GEO information and manual distribution"
+    },
+    {
+      "name": "photo-archive.permanent-folder",
+      "type": "java.lang.String",
+      "description": "folder for storing files permanently"
+    },
+    {
+      "name": "photo-archive.google-api-key",
+      "type": "java.lang.String",
+      "description": "API Google key for reverse GEOcode"
+    },
+    {
+      "name": "photo-archive.default-language",
+      "type": "java.lang.String",
+      "description": "Language for request addresses from google and for resolving mohth names"
+    },
+    {
+      "name": "photo-archive.forbidden-folder-symbols-regex",
+      "type": "java.lang.String",
+      "description": "Regex: Forbidden characters for naming folders. All symbols, filtered by regex, will be truncated. It is forbidden to define symbols: ' '(space), '-' and '_'"
+    }
+  ]
+}
