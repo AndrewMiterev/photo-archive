@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 public class GeocodeServiceImpl implements GeocodeService {
 
-    //    https://maps.googleapis.com/maps/api/geocode/xml?latlng=41.622680555555554,45.92397777777778&key=AIzaSyC5QU1w_8pkJx2mTQSKITZB9us2aXfsEGw&language=EN
     private static final String GOOGLE_URL_TEMPLATE = "https://maps.googleapis.com/maps/api/geocode/json?key=%s&latlng=%s,%s&language=%s";
     private final ConfigProperties config;
 
