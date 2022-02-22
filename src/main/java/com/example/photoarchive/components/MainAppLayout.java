@@ -50,7 +50,6 @@ public class MainAppLayout extends AppLayout implements LocaleChangeObserver, Be
 		loadLayout();
 	}
 
-
 	private void loadLayout() {
 		fillHeader();
 		fillDrawer();
