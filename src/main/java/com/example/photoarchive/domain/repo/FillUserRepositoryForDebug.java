@@ -1,14 +1,12 @@
 package com.example.photoarchive.domain.repo;
 
 import com.example.photoarchive.domain.entities.Role;
+import com.example.photoarchive.domain.entities.User;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
-import com.example.photoarchive.domain.entities.User;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,8 +23,9 @@ public class FillUserRepositoryForDebug {
 
 	@PostConstruct
 	private void fillDebugUsers() {
-		log.warn("!!! to delete module! Number users in collection {}", userRepository.count());
-		if (userRepository.count() < 2) {
+		var numberRecordsInUsersRepository = userRepository.count();
+		log.warn("!!! to delete module! Number users in collection {}", numberRecordsInUsersRepository);
+		if (numberRecordsInUsersRepository < 2) {
 			var userAdmin = User.builder()
 					.username("admin")
 					.password(passwordEncoder.encode("admin"))
