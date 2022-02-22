@@ -1,13 +1,8 @@
 package com.example.photoarchive.components;
 
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -19,11 +14,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-import org.checkerframework.common.subtyping.qual.Bottom;
-
-import java.util.Objects;
 
 public class ConfirmDialog extends Dialog {
 	private final H2 dialogTitle = new H2("Confirmation dialog");
@@ -111,12 +102,12 @@ public class ConfirmDialog extends Dialog {
 		}
 	}
 
-	public static class RejectEvent extends ComponentEvent<ConfirmDialog> {
-		public RejectEvent(ConfirmDialog source) {
-			super(source, true);
-		}
-	}
-
+//	public static class RejectEvent extends ComponentEvent<ConfirmDialog> {
+//		public RejectEvent(ConfirmDialog source) {
+//			super(source, true);
+//		}
+//	}
+//
 	public static class ConfirmEvent extends ComponentEvent<ConfirmDialog> {
 		public ConfirmEvent(ConfirmDialog source) {
 			super(source, true);
