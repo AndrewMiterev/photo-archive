@@ -24,8 +24,8 @@ public class FillUserRepositoryForDebug {
 	}
 
 	@PostConstruct
-	private void fillUser() {
-		log.warn("to delete module! Number users in collection {}", userRepository.count());
+	private void fillDebugUsers() {
+		log.warn("!!! to delete module! Number users in collection {}", userRepository.count());
 		if (userRepository.count() < 2) {
 			var userAdmin = User.builder()
 					.username("admin")
