@@ -27,5 +27,6 @@ public interface FileService {
     void callConsumerOnLoad(BiConsumer<StreamResource, Photo> consumer, Photo photo, CompletableFuture<byte[]> data);
 	void moveToCorrupted(Photo photo);
     void moveToUnprocessed(String folderName, String fileName);
-    void iterateByPermanentFolder(BiConsumer<String, String> consumer);
+    void iterateByPermanentFolder(BiConsumer<String, String> fileConsumer);
+    String getFolderForUnprocessed();
 }

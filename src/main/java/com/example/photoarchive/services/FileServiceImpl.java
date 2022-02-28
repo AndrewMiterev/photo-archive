@@ -306,33 +306,35 @@ public class FileServiceImpl implements FileService {
 
 	@Override
 	public void moveToUnprocessed(String folderName, String fileName) {
-		moveTo(folderName, fileName, getFolderForUnProcessed(), "unprocessed-%s".formatted(calculateHash(folderName, fileName)));
-	}
-
-	private String getFolderForUnProcessed() {
-		return config.getUnprocessedFolder();
+		moveTo(folderName, fileName, getFolderForUnprocessed(), "unprocessed-%s-%s".formatted(calculateHash(folderName, fileName), fileName));
 	}
 
 	private String getFolderForCorrupted() {
 		return config.getCorruptedFolder();
 	}
 
-	public void iterateByPermanentFolder(BiConsumer<String, String> consumer) {
-		Objects.requireNonNull(consumer);
+	@Override
+	public void iterateByPermanentFolder(BiConsumer<String, String> fileConsumer) {
+		Objects.requireNonNull(fileConsumer);
 		Path permanentRoot = Path.of(config.getPermanentFolder());
-		log.trace("start iterate by permanent folder: {}", permanentRoot);
+		log.trace("start iterate walk by permanent folder {{}}", permanentRoot);
 		try {
 			Files.walk(permanentRoot)
 					.parallel()
 					.filter(Files::isRegularFile)
-					.forEach(path -> consumer.accept(path.getParent().toString(), path.getFileName().toString()));
+					.forEach(path -> fileConsumer.accept(path.getParent().toString(), path.getFileName().toString()));
 		} catch (RuntimeException e) {
-			log.warn("Walk on {}. {}", permanentRoot, e.getMessage());
+			log.warn("Walk on {{}}. {{}}", permanentRoot, e.getMessage());
 			throw new RuntimeException(e);
 		} catch (IOException e) {
-			log.warn("IOException directory {}. {}", permanentRoot, e.getMessage());
+			log.warn("IOException directory {{}}. {{}}", permanentRoot, e.getMessage());
 			throw new RuntimeException(e);
 		}
-		log.trace("finish walk {}", permanentRoot);
+		log.trace("finish iterate walk {{}}", permanentRoot);
+	}
+
+	@Override
+	public String getFolderForUnprocessed() {
+		return config.getUnprocessedFolder();
 	}
 }

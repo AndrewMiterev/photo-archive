@@ -192,7 +192,7 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 		log.trace("validate all collections");
 		metaService.getPhotosWithNotStatus("hash").forEach(p -> {
 			var hash = fileService.calculateHash(p);
-//            log.debug("calculated hash {} for {}", hash, p);
+            log.debug("calculated hash {} for {}", hash, p);
 			if (!p.getHash().equals(hash)) {
 				fileService.moveToCorrupted(p);
 				protocolService.add("Warning", "Photo has another hash {%s}, {%s}".formatted(hash, p));
@@ -203,14 +203,17 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 	}
 
 	public void processCheckPermanentFolder() {
-		log.trace("scan all permanent folders");
+		log.trace("scan permanent folder for unlinked files");
 		fileService.iterateByPermanentFolder((folderName, fileName) -> {
-			var hash = fileService.calculateHash(fileName, folderName);
+//			log.debug("check consumer take folder {{}} and file {{}}", folderName, fileName);
+			var hash = fileService.calculateHash(folderName, fileName);
+//			log.debug("hash is {{}}", hash);
 			var photo = metaService.getPhoto(hash);
+//			log.debug("photo {{}}", photo);
 			if (photo.isEmpty()) {
-//				fileService.moveToUnprocessed(folderName, fileName);
+				fileService.moveToUnprocessed(folderName, fileName);
 				protocolService.add("Warning", "File not presented in meta {%s} {%s}".formatted(folderName, fileName));
-				log.warn("File not presented in meta {} {}", folderName, fileName);
+				log.warn("File not presented in meta moved to unprocessed {{}} {{}} {{}}", folderName, fileName, fileService.getFolderForUnprocessed());
 			}
 		});
 	}
