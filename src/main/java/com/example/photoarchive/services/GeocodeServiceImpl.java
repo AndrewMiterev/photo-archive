@@ -154,13 +154,12 @@ public class GeocodeServiceImpl implements GeocodeService {
 	public String get(Geo geo) {
 		var cache = repository.findById(geo);
 		if (cache.isPresent()) return cache.get().getGeoCode();
-		var geoCode = getGeocode(geo.getLatitude(), geo.getLongitude());
+		var geoCode = pack(getGeocode(geo.getLatitude(), geo.getLongitude()));
 		repository.save(GeoCache.builder().geo(geo).geoCode(geoCode).build());
 		return geoCode;
 	}
 
-	@Override
-	public String pack(String geocode) {
+	private String pack(String geocode) {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode responseJsonNode = mapper.readTree(geocode);

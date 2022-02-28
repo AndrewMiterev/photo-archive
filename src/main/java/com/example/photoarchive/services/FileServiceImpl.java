@@ -38,6 +38,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Log4j2
@@ -163,21 +164,28 @@ public class FileServiceImpl implements FileService {
 		LocalDateTime date3 = null;
 		Geo geo = null;
 		LocalDateTime dateGps = null;
+		String camera = null;
 		try {
 			Metadata metadata = ImageMetadataReader.readMetadata(Paths.get(photo.getFolder(), photo.getName()).toFile());
+
 //            for (Directory directory : metadata.getDirectories()) {
 //                log.debug("   Directory {}", directory.getName());
 //                for (Tag tag : directory.getTags()) {
 //                    log.debug("      Tag {} {} {}", tag.getTagName(), tag.getDescription(), tag.toString());
 //                }
 //            }
+
 			if (metadata == null) {
 				log.debug("! metadata is null");
 				return null;
 			}
 			ExifIFD0Directory exifIFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-			if (Objects.nonNull(exifIFD0Directory))
+			if (Objects.nonNull(exifIFD0Directory)) {
 				date0 = convertToLocalDateTime(exifIFD0Directory.getDate(ExifIFD0Directory.TAG_DATETIME));
+				var cameraMaker = exifIFD0Directory.getString(ExifSubIFDDirectory.TAG_MAKE);
+				var cameraModel = exifIFD0Directory.getString(ExifSubIFDDirectory.TAG_MODEL);
+				camera = Stream.of(cameraMaker, cameraModel).filter(Objects::nonNull).collect(Collectors.joining(" "));
+			}
 
 			ExifSubIFDDirectory exifSubIDDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
 			if (Objects.nonNull(exifSubIDDDirectory)) {
@@ -185,6 +193,7 @@ public class FileServiceImpl implements FileService {
 				date2 = convertToLocalDateTime(exifSubIDDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL));
 				date3 = convertToLocalDateTime(exifSubIDDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_DIGITIZED));
 			}
+
 
 			GpsDirectory gpsDir = metadata.getFirstDirectoryOfType(GpsDirectory.class);
 			if (Objects.nonNull(gpsDir)) {
@@ -219,6 +228,7 @@ public class FileServiceImpl implements FileService {
 			return ExifData.builder()
 					.geo(geo)
 					.date(photoDate)
+					.camera(camera)
 					.build();
 		} catch (ImageProcessingException e) {
 			log.warn("the file is not a Photo {} {}", photo, e.getMessage());
@@ -313,25 +323,30 @@ public class FileServiceImpl implements FileService {
 		return config.getCorruptedFolder();
 	}
 
-	@Override
-	public void iterateByPermanentFolder(BiConsumer<String, String> fileConsumer) {
-		Objects.requireNonNull(fileConsumer);
-		Path permanentRoot = Path.of(config.getPermanentFolder());
-		log.trace("start iterate walk by permanent folder {{}}", permanentRoot);
+	private void iterateFolder(String folder, BiConsumer<String, String> fileConsumer) {
+		Path root = Path.of(folder);
+		log.trace("start iterate walk by folder {{}}", root);
 		try {
-			Files.walk(permanentRoot)
+			Files.walk(root)
 					.parallel()
 					.filter(Files::isReadable)
 					.filter(Files::isRegularFile)
 					.forEach(path -> fileConsumer.accept(path.getParent().toString(), path.getFileName().toString()));
 		} catch (RuntimeException e) {
-			log.warn("Walk on {{}}. {{}}", permanentRoot, e.getMessage());
+			log.warn("Walk on {{}}. {{}}", root, e.getMessage());
 			throw new RuntimeException(e);
 		} catch (IOException e) {
-			log.warn("IOException directory {{}}. {{}}", permanentRoot, e.getMessage());
+			log.warn("IOException directory {{}}. {{}}", root, e.getMessage());
 			throw new RuntimeException(e);
 		}
-		log.trace("finish iterate walk {{}}", permanentRoot);
+		log.trace("finish iterate walk {{}}", root);
+	}
+
+	public void iteratePossibleFolders(BiConsumer<String, String> fileConsumer) {
+		Objects.requireNonNull(fileConsumer);
+		iterateFolder(config.getPermanentFolder(), fileConsumer);
+		iterateFolder(config.getManualFolder(), fileConsumer);
+		iterateFolder(config.getProcessingFolder(), fileConsumer);
 	}
 
 	@Override

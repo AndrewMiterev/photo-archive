@@ -12,4 +12,5 @@ import java.time.LocalDateTime;
 public class ExifData {
     private Geo geo;
     private LocalDateTime date;
+    private String camera;
 }

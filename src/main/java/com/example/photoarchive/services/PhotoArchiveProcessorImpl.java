@@ -114,8 +114,7 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 	@Override
 	public void processObtainGeocode(Photo photo) {
 		log.trace("the process of obtaining a geocode for {}", photo);
-		var result = geoService.get(photo.getExifData().getGeo());
-		var geocode = geoService.pack(result);
+		var geocode = geoService.get(photo.getExifData().getGeo());
 		log.debug("GEO code {}", geocode);
 		if (Objects.nonNull(geocode)) {
 			photo.setGeocode(geocode);
@@ -204,7 +203,7 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 
 	public void processCheckPermanentFolder() {
 		log.trace("scan permanent folder for unlinked files");
-		fileService.iterateByPermanentFolder((folderName, fileName) -> {
+		fileService.iteratePossibleFolders((folderName, fileName) -> {
 //			log.debug("check consumer take folder {{}} and file {{}}", folderName, fileName);
 			var hash = fileService.calculateHash(folderName, fileName);
 //			log.debug("hash is {{}}", hash);

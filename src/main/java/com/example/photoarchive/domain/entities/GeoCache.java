@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Builder
-@Document
+@Document("geo-cache")
 public class GeoCache {
 	@Id
 	private Geo geo;
