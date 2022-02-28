@@ -324,10 +324,8 @@ public class FileServiceImpl implements FileService {
 		try {
 			Files.walk(permanentRoot)
 					.parallel()
-					.forEach(path -> {
-						if (Files.isRegularFile(path))
-							consumer.accept(path.getParent().toString(), path.getFileName().toString());
-					});
+					.filter(Files::isRegularFile)
+					.forEach(path -> consumer.accept(path.getParent().toString(), path.getFileName().toString()));
 		} catch (RuntimeException e) {
 			log.warn("Walk on {}. {}", permanentRoot, e.getMessage());
 			throw new RuntimeException(e);

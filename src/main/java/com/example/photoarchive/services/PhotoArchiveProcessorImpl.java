@@ -208,7 +208,7 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 			var hash = fileService.calculateHash(fileName, folderName);
 			var photo = metaService.getPhoto(hash);
 			if (photo.isEmpty()) {
-				fileService.moveToUnprocessed(folderName, fileName);
+//				fileService.moveToUnprocessed(folderName, fileName);
 				protocolService.add("Warning", "File not presented in meta {%s} {%s}".formatted(folderName, fileName));
 				log.warn("File not presented in meta {} {}", folderName, fileName);
 			}
