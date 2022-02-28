@@ -321,6 +321,7 @@ public class FileServiceImpl implements FileService {
 		try {
 			Files.walk(permanentRoot)
 					.parallel()
+					.filter(Files::isReadable)
 					.filter(Files::isRegularFile)
 					.forEach(path -> fileConsumer.accept(path.getParent().toString(), path.getFileName().toString()));
 		} catch (RuntimeException e) {

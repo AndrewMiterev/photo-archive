@@ -94,13 +94,12 @@ public class FilesView extends VerticalLayout {
 		});
 		add(buttonMove);
 
-		var buttonCheck = new Button("Re-calculate hash") {{
+		add(new Button("Re-calculate hash") {{
 			addClickListener(e -> {
 				log.trace("re-calculate files pressed");
 				processor.processCheckCollections();
 			});
-		}};
-		add(buttonCheck);
+		}});
 
 		add(new Button("Re-scan permanent folder") {{
 			addClickListener(e -> {
