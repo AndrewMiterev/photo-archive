@@ -12,6 +12,7 @@ public interface FileService {
     String storeNewFile(InputStream stream);
     String getFolderForNewFiles();
     String calculateHash(Photo photo);
+    String calculateHash(String folderName, String fileName);
     String getFolderForDuplicates();
     void moveToDuplicates(Photo photo);
     ExifData getExifData(Photo photo);
@@ -24,4 +25,7 @@ public interface FileService {
     String getPermanentNameFor(Photo photo);
     CompletableFuture<byte[]> readPhotoDataAsync(Photo photo);
     void callConsumerOnLoad(BiConsumer<StreamResource, Photo> consumer, Photo photo, CompletableFuture<byte[]> data);
+	void moveToCorrupted(Photo photo);
+    void moveToUnprocessed(String folderName, String fileName);
+    void iterateByPermanentFolder(BiConsumer<String, String> consumer);
 }

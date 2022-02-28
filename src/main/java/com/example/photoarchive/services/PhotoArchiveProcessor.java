@@ -14,4 +14,6 @@ public interface PhotoArchiveProcessor {
     void processResolveGeocode(Photo photo);
     void processPredict(Photo photo);
     void processMove(Photo photo);
+    void processCheckCollections();
+	void processCheckPermanentFolder();
 }

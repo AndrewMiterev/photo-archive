@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface PhotoRepository extends MongoRepository<Photo, String> {
     List<Photo> findAllByStatus(String status);
+	List<Photo> findAllByStatusNot(String status);
 }

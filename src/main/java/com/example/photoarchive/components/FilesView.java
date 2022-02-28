@@ -1,19 +1,15 @@
 package com.example.photoarchive.components;
 
-import com.example.photoarchive.domain.entities.Photo;
 import com.example.photoarchive.services.FileMetaService;
 import com.example.photoarchive.services.PhotoArchiveProcessor;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
 import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.security.RolesAllowed;
-import java.util.function.BiConsumer;
 
 @Log4j2
 @Route(value = "files", layout = MainAppLayout.class)
@@ -25,9 +21,6 @@ public class FilesView extends VerticalLayout {
 	public FilesView(FileMetaService service, PhotoArchiveProcessor processor) {
 		this.service = service;
 		this.processor = processor;
-
-		add(new H1("Work with files"));
-//        setAlignItems(Alignment.CENTER);
 
 		ConfirmDialog dialog = new ConfirmDialog();
 		dialog.setTitle("Clear all collections?");
@@ -100,5 +93,20 @@ public class FilesView extends VerticalLayout {
 			list.forEach(this.processor::processMove);
 		});
 		add(buttonMove);
+
+		var buttonCheck = new Button("Re-calculate hash") {{
+			addClickListener(e -> {
+				log.trace("re-calculate files pressed");
+				processor.processCheckCollections();
+			});
+		}};
+		add(buttonCheck);
+
+		add(new Button("Re-scan permanent folder") {{
+			addClickListener(e -> {
+				log.trace("re-scan permanent folder pressed");
+				processor.processCheckPermanentFolder();
+			});
+		}});
 	}
 }

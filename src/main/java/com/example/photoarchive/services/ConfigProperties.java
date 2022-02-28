@@ -44,4 +44,8 @@ public class ConfigProperties {
     @Min(value = 3, message = "Minimum 3. One for each others previous, current and next")
     @Max(value = 100)
     private Integer cacheSizeNumberFiles;
+    @NotBlank
+    private String corruptedFolder;
+    @NotBlank
+    private String unprocessedFolder;
 }

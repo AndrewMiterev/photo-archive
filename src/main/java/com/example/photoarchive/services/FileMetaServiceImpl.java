@@ -54,4 +54,9 @@ public class FileMetaServiceImpl implements FileMetaService {
         Pageable pageable = PageRequest.of(recordIndex, 1);
         return repository.findAll(pageable).get().findFirst().orElseThrow();
     }
+
+    @Override
+    public List<Photo> getPhotosWithNotStatus(String status) {
+        return repository.findAllByStatusNot(status);
+    }
 }

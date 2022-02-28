@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -55,27 +56,32 @@ public class FileServiceImpl implements FileService {
 		return LocalDateTime.ofInstant(dateToConvert.toInstant(), ZoneId.systemDefault());
 	}
 
-	private boolean moveTo(Photo photo, String toFolder) {
-		return moveToWithPrefix(photo, toFolder, "");
-	}
-
 	private boolean moveToWithPrefix(Photo photo, String toFolder, String prefix) {
 		var filename = service.filenameWithHash(photo, prefix);
 		return moveTo(photo, toFolder, filename);
 	}
 
+	private boolean moveTo(Photo photo, String toFolder) {
+		return moveToWithPrefix(photo, toFolder, "");
+	}
+
 	private boolean moveTo(Photo photo, String toFolder, String newFileName) {
+		if (moveTo(photo.getFolder(), photo.getName(), toFolder, newFileName)) {
+			photo.setFolder(toFolder);
+			photo.setName(newFileName);
+			return true;
+		}
+		return false;
+	}
+
+	private boolean moveTo(String fromFolder, String fromFileName, String toFolder, String toFileName) {
 		try {
-			var sourceFile = Paths.get(photo.getFolder(), photo.getName()).toFile();
-			var destinationFile = Paths.get(toFolder, newFileName).toFile();
-//            FileUtils.moveFileToDirectory(sourceFile,
-//                    new File(toFolder), true);
+			var sourceFile = Paths.get(fromFolder, fromFileName).toFile();
+			var destinationFile = Paths.get(toFolder, toFileName).toFile();
 			FileUtils.moveFile(
 					sourceFile,
 					destinationFile
 			);
-			photo.setFolder(toFolder);
-			photo.setName(newFileName);
 		} catch (IOException e) {
 			log.error(e);
 			return false;
@@ -127,7 +133,12 @@ public class FileServiceImpl implements FileService {
 
 	@Override
 	public String calculateHash(Photo photo) {
-		try (InputStream is = Files.newInputStream(Paths.get(photo.getFolder(), photo.getName()))) {
+		return calculateHash(photo.getFolder(), photo.getName());
+	}
+
+	@Override
+	public String calculateHash(String folderName, String fileName) {
+		try (InputStream is = Files.newInputStream(Paths.get(folderName, fileName))) {
 			return DigestUtils.md5Hex(is);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -286,5 +297,44 @@ public class FileServiceImpl implements FileService {
 			}
 		} else data.thenAcceptAsync(d ->
 				consumer.accept(new StreamResource(photo.getName(), () -> new ByteArrayInputStream(d)), photo));
+	}
+
+	@Override
+	public void moveToCorrupted(Photo photo) {
+		moveToWithPrefix(photo, getFolderForCorrupted(), "corrupted-%s-".formatted(calculateHash(photo)));
+	}
+
+	@Override
+	public void moveToUnprocessed(String folderName, String fileName) {
+		moveTo(folderName, fileName, getFolderForUnProcessed(), "unprocessed-%s".formatted(calculateHash(folderName, fileName)));
+	}
+
+	private String getFolderForUnProcessed() {
+		return config.getUnprocessedFolder();
+	}
+
+	private String getFolderForCorrupted() {
+		return config.getCorruptedFolder();
+	}
+
+	public void iterateByPermanentFolder(BiConsumer<String, String> consumer) {
+		Objects.requireNonNull(consumer);
+		Path permanentRoot = Path.of(config.getPermanentFolder());
+		log.trace("start iterate by permanent folder: {}", permanentRoot);
+		try {
+			Files.walk(permanentRoot)
+					.parallel()
+					.forEach(path -> {
+						if (Files.isRegularFile(path))
+							consumer.accept(path.getParent().toString(), path.getFileName().toString());
+					});
+		} catch (RuntimeException e) {
+			log.warn("Walk on {}. {}", permanentRoot, e.getMessage());
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			log.warn("IOException directory {}. {}", permanentRoot, e.getMessage());
+			throw new RuntimeException(e);
+		}
+		log.trace("finish walk {}", permanentRoot);
 	}
 }
