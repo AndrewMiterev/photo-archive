@@ -10,11 +10,11 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
@@ -37,13 +37,12 @@ public class SlideShow extends VerticalLayout {
 
 	private final Image image = new Image();
 	private final Text photoDescription = new Text("");
-	private final Runnable doNextPhotoOnTimer;
 
 	private final Div slideshowDiv = new Div();
 	private Boolean fullScreen = false;
 
-	private Registration registrationExecutionStopper = null;
-	private VaadinSession registrationExecutionStopperSession = null;
+	private Registration registrationExecutionStopper;
+	private final VaadinSession registrationExecutionStopperSession;
 	private OnlyOneJobExecutor executor;
 
 	private BiConsumer<StreamResource, Photo> consumer;
@@ -137,7 +136,6 @@ public class SlideShow extends VerticalLayout {
 		full.addClickShortcut(Key.ENTER);
 
 		setParametersForSlideshowDif();
-		add(slideshowDiv);
 
 		Div cardWithControlDiv = new Div();
 		cardWithControlDiv.getStyle()
@@ -195,13 +193,15 @@ public class SlideShow extends VerticalLayout {
 				stopTimerEngine();
 		});
 
-		doNextPhotoOnTimer = () -> {
+		Runnable doNextPhotoOnTimer = () -> {
 			reloadSequence();
 			service.next(sequence, consumer);
 			executor.runAfter(config.getSlideshowDelayBetweenPhotos());
 		};
 		executor = new OnlyOneJobExecutor(doNextPhotoOnTimer);
 		reloadSequence();
+		if (service.isEmpty()) add(new H2("Photo-Archive is empty"));
+		else add(slideshowDiv);
 	}
 
 	private void stopTimerEngine() {
@@ -223,11 +223,13 @@ public class SlideShow extends VerticalLayout {
 		consumer = (stream, photo) -> getUI().ifPresent(ui -> ui.access(() -> {
 			image.getElement().setAttribute("src", stream)
 					.setAttribute("alt", photo.getName())
-					.setAttribute("title", photo.getReadableGeocode().getAddress())
+					.setAttribute("title", Objects.isNull(photo.getTitle()) ? "" : photo.getTitle())
 			;
-			photoDescription.setText(photo.getReadableGeocode().getAddress());
+			photoDescription.setText(photo.getTitle());
 		}));
-		service.current(sequence, consumer);
+		service.reload();
+		if (!service.isEmpty())
+			service.current(sequence, consumer);
 	}
 
 	private Icon iconForButton(VaadinIcon viewIcon) {

@@ -2,7 +2,7 @@ package com.example.photoarchive.services;
 
 import com.example.photoarchive.domain.entities.Geo;
 import com.example.photoarchive.domain.entities.GeoCache;
-import com.example.photoarchive.domain.entities.ReadableGeocode;
+import com.example.photoarchive.domain.entities.ReadableGeoInfo;
 import com.example.photoarchive.domain.repo.GeoCacheRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -66,7 +66,7 @@ public class GeocodeServiceImpl implements GeocodeService {
 	}
 
 	@Override
-	public ReadableGeocode resolve(String geocode) {
+	public ReadableGeoInfo resolve(String geocode) {
 		var storage = new Object() {
 			String country = "", locality = "", address = "";
 			String localityFromRoute = "";
@@ -134,7 +134,7 @@ public class GeocodeServiceImpl implements GeocodeService {
 			return null;
 		}
 //        log.debug("country:{} locality:{} address:{}", storage.country, storage.locality, storage.address);
-		return ReadableGeocode.builder()
+		return ReadableGeoInfo.builder()
 				.country(storage.country)
 				.locality(storage.locality)
 				.address(storage.address)

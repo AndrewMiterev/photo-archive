@@ -49,6 +49,7 @@ public class RingRandomSequence implements Iterator<Integer> {
 	}
 
 	private int changeBy(int change) {
+		if (numbers.length == 0) return 0;
 		var result = pointer + change;
 		while (result >= numbers.length) result -= numbers.length;
 		while (result < 0) result += numbers.length;

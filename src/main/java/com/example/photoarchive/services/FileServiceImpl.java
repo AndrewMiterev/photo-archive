@@ -325,7 +325,7 @@ public class FileServiceImpl implements FileService {
 
 	private void iterateFolder(String folder, BiConsumer<String, String> fileConsumer) {
 		Path root = Path.of(folder);
-		log.trace("start iterate walk by folder {{}}", root);
+		log.trace("the begin of the passage through the files in the folder {{}}", root);
 		try {
 			Files.walk(root)
 					.parallel()
@@ -339,7 +339,7 @@ public class FileServiceImpl implements FileService {
 			log.warn("IOException directory {{}}. {{}}", root, e.getMessage());
 			throw new RuntimeException(e);
 		}
-		log.trace("finish iterate walk {{}}", root);
+		log.trace("the finish of the passage through the files in the folder {{}}", root);
 	}
 
 	public void iteratePossibleFolders(BiConsumer<String, String> fileConsumer) {

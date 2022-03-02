@@ -73,8 +73,9 @@ public class PredictServiceImpl implements PredictService {
 		String subFolder = monthName;
 		String subSubFolder = dateName;
 		String fileName = dateTimeFilename;
+		String title = Objects.isNull(photo.getTitle()) ? photo.getOriginal().getName() : photo.getTitle();
 
-		var geocode = photo.getReadableGeocode();
+		var geocode = photo.getGeoInfo();
 		if (Objects.nonNull(geocode)) {
 			if (!ObjectUtils.allNotNull(geocode.getCountry(), geocode.getLocality(), geocode.getAddress())) {
 				log.error("Not all readable geocodes for photos are defined {}", photo);
@@ -84,6 +85,7 @@ public class PredictServiceImpl implements PredictService {
 			subFolder = concatBy(". ", monthName, geocode.getLocality());
 			subSubFolder = concatBy(". ", dateName, geocode.getAddress());
 			fileName = concatBy("_", fileName, geocode.getAddress().replaceAll(" ", "_"));
+			title = geocode.getAddress();
 		}
 
 		fileName = filenameWithHash(photo, fileName);
@@ -94,6 +96,7 @@ public class PredictServiceImpl implements PredictService {
 				.subSubFolder(config.getUseSubSubFolders() ? subSubFolder : null)
 				.name(fileName)
 				.date(date)
+				.title(title)
 				.build();
 	}
 }

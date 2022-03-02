@@ -7,7 +7,7 @@ import lombok.ToString;
 @Data
 @Builder
 @ToString
-public class ReadableGeocode {
+public class ReadableGeoInfo {
     String country;
     String locality;
     String address;

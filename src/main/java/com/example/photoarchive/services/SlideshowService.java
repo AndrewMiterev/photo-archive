@@ -16,4 +16,5 @@ public interface SlideshowService {
     LocalDateTime directoryIsLoadedAt();
     RingRandomSequence makeSequence(); // todo sorting parameters
     CompletableFuture<Void> reload();
+    boolean isEmpty();
 }

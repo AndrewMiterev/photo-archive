@@ -21,8 +21,9 @@ public class Photo {
     private ExifData exifData;
     @ToString.Exclude()
     private String geocode;
-    private ReadableGeocode readableGeocode;
+    private ReadableGeoInfo geoInfo;
     private PredictName predict;
     private String user;
     private LocalDateTime date;
+    private String title;
 }

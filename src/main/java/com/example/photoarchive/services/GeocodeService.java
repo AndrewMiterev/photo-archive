@@ -1,10 +1,10 @@
 package com.example.photoarchive.services;
 
 import com.example.photoarchive.domain.entities.Geo;
-import com.example.photoarchive.domain.entities.ReadableGeocode;
+import com.example.photoarchive.domain.entities.ReadableGeoInfo;
 
 public interface GeocodeService {
     String get(Geo geo);
-    ReadableGeocode resolve(String geocode);
+    ReadableGeoInfo resolve(String geocode);
     String status(String geocode);
 }

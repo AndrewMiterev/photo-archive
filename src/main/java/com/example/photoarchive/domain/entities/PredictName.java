@@ -14,5 +14,6 @@ public class PredictName {
     String subFolder;
     String subSubFolder;
     String name;
+    String title;
     LocalDateTime date;
 }

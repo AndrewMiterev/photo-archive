@@ -37,7 +37,8 @@ public class SlideshowServiceImpl implements SlideshowService {
 	@PostConstruct
 	void postConstruct() {
 		photosCount = metaService.getCount();
-		if (photosCount < 1) throw new RuntimeException("No ready photos in archive");
+		if (photosCount < 1)
+			log.warn("No ready photos in archive");
 		stamp = LocalDateTime.now();
 		processReload = reload();
 	}
@@ -125,10 +126,7 @@ public class SlideshowServiceImpl implements SlideshowService {
 	 */
 	// todo change in final version (also .HIEC e.t.s.)
 	private boolean isaPhotoImage(Photo p) {
-		return
-				p.getName().toLowerCase().endsWith(".jpg")
-						&&
-						Objects.nonNull(p.getReadableGeocode());
+		return p.getName().toLowerCase().endsWith(".jpg");
 	}
 
 	private void preheatPhoto(RingRandomSequence sequence, int offset) {
@@ -161,7 +159,7 @@ public class SlideshowServiceImpl implements SlideshowService {
 
 	private Photo getCurrentPhoto(RingRandomSequence sequence) {
 		if (Objects.nonNull(photos)) return photos[sequence.current()];
-		return findPhotoBySequence(i -> sequence.suppose(i));
+		return findPhotoBySequence(sequence::suppose);
 	}
 
 	@Override
@@ -186,5 +184,10 @@ public class SlideshowServiceImpl implements SlideshowService {
 		fileService.callConsumerOnLoad(consumer, photo, readCachedPhotoData(photo));
 		preheatPhoto(sequence, -1);
 		preheatPhoto(sequence, -2);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return photosCount == 0;
 	}
 }

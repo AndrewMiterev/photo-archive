@@ -138,7 +138,7 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 		var response = geoService.resolve(photo.getGeocode());
 		log.debug("resolved GEO code {}", response);
 		if (Objects.nonNull(response)) {
-			photo.setReadableGeocode(response);
+			photo.setGeoInfo(response);
 			photo.setStatus("predict");
 			log.trace("Photo to name prediction {}", photo);
 		} else {
@@ -173,9 +173,9 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 		log.trace("the process of moving to a permanent place {}", photo);
 		if (fileService.moveToPermanent(photo)) {
 			photo.setDate(photo.getPredict().getDate());
+			photo.setTitle(photo.getPredict().getTitle());
 			photo.setStatus(null);
 			photo.setGeocode(null);
-			photo.setReadableGeocode(null);
 			photo.setPredict(null);
 			metaService.storeMeta(photo);
 		} else {
