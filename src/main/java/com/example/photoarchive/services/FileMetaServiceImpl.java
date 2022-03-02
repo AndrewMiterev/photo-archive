@@ -7,7 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Log4j2
@@ -58,5 +60,10 @@ public class FileMetaServiceImpl implements FileMetaService {
     @Override
     public List<Photo> getPhotosWithNotStatus(String status) {
         return repository.findAllByStatusNot(status);
+    }
+
+    @Override
+    public Map<LocalDate, Integer> getPhotosStatistics() {
+        return null;
     }
 }

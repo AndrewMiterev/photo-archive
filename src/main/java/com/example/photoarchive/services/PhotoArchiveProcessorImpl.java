@@ -172,7 +172,11 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 	public void processMove(Photo photo) {
 		log.trace("the process of moving to a permanent place {}", photo);
 		if (fileService.moveToPermanent(photo)) {
+			photo.setDate(photo.getPredict().getDate());
 			photo.setStatus(null);
+			photo.setGeocode(null);
+			photo.setReadableGeocode(null);
+			photo.setPredict(null);
 			metaService.storeMeta(photo);
 		} else {
 			log.debug("folder {}", fileService.getPermanentFolderFor(photo));

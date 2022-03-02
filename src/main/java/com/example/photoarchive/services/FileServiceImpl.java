@@ -167,6 +167,10 @@ public class FileServiceImpl implements FileService {
 		String camera = null;
 		try {
 			Metadata metadata = ImageMetadataReader.readMetadata(Paths.get(photo.getFolder(), photo.getName()).toFile());
+			if (metadata == null) {
+				log.debug("! metadata is null");
+				return null;
+			}
 
 //            for (Directory directory : metadata.getDirectories()) {
 //                log.debug("   Directory {}", directory.getName());
@@ -175,10 +179,6 @@ public class FileServiceImpl implements FileService {
 //                }
 //            }
 
-			if (metadata == null) {
-				log.debug("! metadata is null");
-				return null;
-			}
 			ExifIFD0Directory exifIFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 			if (Objects.nonNull(exifIFD0Directory)) {
 				date0 = convertToLocalDateTime(exifIFD0Directory.getDate(ExifIFD0Directory.TAG_DATETIME));
@@ -211,7 +211,7 @@ public class FileServiceImpl implements FileService {
 			}
 
 			LocalDateTime dateExif = ObjectUtils.firstNonNull(date0, date1, date2, date3);
-			LocalDateTime photoDate = ObjectUtils.firstNonNull(dateGps, dateExif);
+			LocalDateTime photoDate = ObjectUtils.firstNonNull(dateExif, dateGps);
 
 			if (Objects.nonNull(photoDate)) {
 				if (Objects.nonNull(dateGps) && Objects.nonNull(dateExif) && dateGps.toLocalDate().compareTo(dateExif.toLocalDate()) != 0)

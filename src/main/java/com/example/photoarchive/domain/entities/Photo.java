@@ -6,6 +6,8 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @Document
@@ -22,4 +24,5 @@ public class Photo {
     private ReadableGeocode readableGeocode;
     private PredictName predict;
     private String user;
+    private LocalDateTime date;
 }

@@ -93,6 +93,7 @@ public class PredictServiceImpl implements PredictService {
 				.subFolder(subFolder)
 				.subSubFolder(config.getUseSubSubFolders() ? subSubFolder : null)
 				.name(fileName)
+				.date(date)
 				.build();
 	}
 }
