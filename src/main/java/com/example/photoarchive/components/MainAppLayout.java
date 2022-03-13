@@ -9,7 +9,7 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -82,14 +82,38 @@ public class MainAppLayout extends AppLayout implements LocaleChangeObserver, Be
 	}
 
 	private void fillDrawer() {
-		H2 applicationName = new H2(getTranslation("Program_name"));
-		applicationName.getStyle().set("font-size", "var(--lumo-font-size-l)").set("margin", "0");
+		HorizontalLayout logoPlusName = new HorizontalLayout() {{
+			add(new Image("https://icons.iconarchive.com/icons/thiago-silva/palm/128/Photos-icon.png", "Logo") {{
+				setWidth("50px");
+			}});
+			add(new H1(getTranslation("Program_name")) {{
+				getStyle().set("font-size", "var(--lumo-font-size-l)").set("margin", "0");
+			}});
+		}};
+
+//		"https://icons.iconarchive.com/icons/designcontest/ecommerce-business/128/photos-icon.png"
+//		"https://icons.iconarchive.com/icons/thiago-silva/palm/128/Photos-icon.png"
 
 		drawer.removeAll();
-		drawer.add(applicationName);
+		drawer.add(logoPlusName);
 		drawer.add(fillTabs());
 		drawer.add(footer());
 	}
+
+//	private void callConsumerOnLoad1(@NonNull Consumer<StreamResource> consumer, @NonNull CompletableFuture<byte[]> data) {
+//		data.thenAcceptAsync(d -> consumer.accept(new StreamResource("src", () -> new ByteArrayInputStream(d))));
+//	}
+
+//	private CompletableFuture<byte[]> readPictureDataAsync(String uri) {
+//		return CompletableFuture.supplyAsync(() -> {
+//			try (FileInputStream inputStream = new FileInputStream(uri)) {
+//				return IOUtils.toByteArray(inputStream);
+//			} catch (IOException e) {
+//				log.error("Can't read data {}", uri);
+//				return null;
+//			}
+//		});
+//	}
 
 	private void makeTab(VaadinIcon viewIcon, String viewName, Class<? extends Component> routeTo, Tabs tabs) {
 		if (accessChecker.hasAccess(routeTo)) {

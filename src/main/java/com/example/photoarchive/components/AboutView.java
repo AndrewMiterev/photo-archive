@@ -1,103 +1,97 @@
 package com.example.photoarchive.components;
 
+import com.example.photoarchive.services.FileMetaService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.dialog.DialogVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.ListItem;
+import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.internal.MessageDigestUtil;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import elemental.json.Json;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import javax.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.Map;
 
 @Log4j2
 @Route(value = "", layout = MainAppLayout.class)
 @RouteAlias(value = "home", layout = MainAppLayout.class)
 @RouteAlias(value = "home1", layout = MainAppLayout.class)
 @AnonymousAllowed
-public class AboutView extends Composite<VerticalLayout> implements HasComponents {
+public class AboutView extends VerticalLayout {
 
-	public AboutView() {
-		Div output = new Div();
+	private final FileMetaService service;
 
-		add(new H2("Welcome to Photo-Archive"));
+	public AboutView(FileMetaService service) {
+		this.service = service;
 
-		Button button = new Button("Click me", event -> {
+		setSpacing(false);
+		add(new HorizontalLayout(
+					new Image("https://icons.iconarchive.com/icons/thiago-silva/palm/128/Photos-icon.png", "Logo") {{
+						setMaxWidth("100px");
+						getStyle().set("object-fit", "contain");
+					}},
+					new H2("Welcome to Family-Photo-Archive!") {{
+						getStyle().set("margin", "0");
+					}}
+			) {{
+				setDefaultVerticalComponentAlignment(Alignment.CENTER);
+			}},
+				new H3("This program is designed to maintain a family photo archive"),
+				new H4("Accumulates photos by:"),
+				new UnorderedList(
+						new ListItem("Drag-and-drop in any browser into the program window"),
+						new ListItem("Subscriptions to the WhatsApp or Telegram family group"),
+						new ListItem("Initial scanning (by contacting the developers) of the catalog on a physical disk or USB drive")
+				),
+				new Div()
+		);
+		add(new H4("Debug section"));
+		add(new Button("Wow!") {{
+			addClickListener(event->{
+				Notification.show("Wow pressed!");
+				Map<LocalDate, Integer> histogram = AboutView.this.service.getPhotosStatistics();
+			});
+		}});
+		add(new Button("FUTURE: to show generated text file", event -> {
 			final StreamResource resource = new StreamResource("foo.txt",
 					() -> new ByteArrayInputStream("foo".getBytes()));
 			final StreamRegistration registration = VaadinSession.getCurrent().getResourceRegistry().registerResource(resource);
 			UI.getCurrent().getPage().setLocation(registration.getResourceUri());
-		});
-		add(button);
-		Button sessions = new Button("Sessions") {{
-			addClickListener(e -> {
-//				var aaa = VaadinSession.getAllSessions(HttpSession);
-				var aaa = VaadinSession.getCurrent().getUIs();
-				aaa.forEach(s -> log.debug("UI {}",s.getSession()));
-				aaa.forEach(s -> s.getSession().getSession().setMaxInactiveInterval(10));
-			});
-		}};
-		add(sessions);
-
-		var buttonTest = new Button("Test");
-		buttonTest.addClickListener(e->{
-			log.trace("test pressed");
-			Dialog dialog = new Dialog();
-			dialog.getElement().setAttribute("aria-label", "Create new employee");
-			dialog.addThemeVariants(DialogVariant.LUMO_NO_PADDING);
-			add(dialog);
-			dialog.open();
-		});
-		add(buttonTest);
-
-
-//		UI.getCurrent().setPollInterval(1000);
-//		VaadinSession.getCurrent().getSession().setMaxInactiveInterval(10);
+		}));
 	}
+
+	/**
+	 * Открыть новый компонент Имаже и Текст
+	 * до конца файла
+	 */
 
 	private Component createComponent(String mimeType, String fileName,
 									  InputStream stream) {
@@ -134,10 +128,9 @@ public class AboutView extends Composite<VerticalLayout> implements HasComponent
 		}
 		Div content = new Div();
 		String text = String.format("Mime type: '%s'\nSHA-256 hash: '%s'",
-				mimeType, MessageDigestUtil.sha256(stream.toString()));
+				mimeType, Arrays.toString(MessageDigestUtil.sha256(stream.toString())));
 		content.setText(text);
 		return content;
-
 	}
 
 	private Component createTextComponent(InputStream stream) {

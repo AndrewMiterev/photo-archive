@@ -29,11 +29,10 @@ public class DashboardView extends Div implements RouterLayout {
 
         layout.add(new H1("Dashboard"));
 
-        Map<LocalDate, Integer> histogram = service.getPhotosStatistics();
-
         layout.add(new Button("Wow!") {{
             addClickListener(event->{
                 Notification.show("Wow pressed!");
+                Map<LocalDate, Integer> histogram = service.getPhotosStatistics();
             });
         }});
     }
