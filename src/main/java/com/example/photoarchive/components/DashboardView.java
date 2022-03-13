@@ -17,23 +17,23 @@ import java.util.Map;
 @PermitAll
 @Route(value = "dashboard", layout = MainAppLayout.class)
 public class DashboardView extends Div implements RouterLayout {
-    private final FileMetaService service;
+	private final FileMetaService service;
 
-    public DashboardView(FileMetaService service) {
-        this.service = service;
+	public DashboardView(FileMetaService service) {
+		this.service = service;
 
-        VerticalLayout layout = new VerticalLayout();
-        add(layout);
-        layout.setAlignItems(FlexComponent.Alignment.CENTER);
-        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+		VerticalLayout layout = new VerticalLayout();
+		add(layout);
+		layout.setAlignItems(FlexComponent.Alignment.CENTER);
+		layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
-        layout.add(new H1("Dashboard"));
+		layout.add(new H1("Dashboard"));
 
-        layout.add(new Button("Wow!") {{
-            addClickListener(event->{
-                Notification.show("Wow pressed!");
-                Map<LocalDate, Integer> histogram = service.getPhotosStatistics();
-            });
-        }});
-    }
+		layout.add(new Button("Wow!") {{
+			addClickListener(event -> {
+				Notification.show("Wow pressed!");
+				Map<LocalDate, Integer> histogram = service.getPhotosStatistics();
+			});
+		}});
+	}
 }
