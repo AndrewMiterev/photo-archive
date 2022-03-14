@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -16,6 +17,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.internal.MessageDigestUtil;
@@ -75,9 +77,10 @@ public class AboutView extends VerticalLayout {
 		);
 		add(new H4("Debug section"));
 		add(new Button("Wow!") {{
-			addClickListener(event->{
-				Notification.show("Wow pressed!");
-				Map<LocalDate, Integer> histogram = AboutView.this.service.getPhotosStatistics();
+			addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+			addClickListener(event -> {
+				Notification.show("Wow pressed!").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+				Map<LocalDate, Integer> histogram = service.getPhotosStatistics();
 			});
 		}});
 		add(new Button("FUTURE: to show generated text file", event -> {
