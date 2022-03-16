@@ -20,6 +20,12 @@
         <vaadin.version>22.0.3</vaadin.version>
     </properties>
     <dependencies>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>

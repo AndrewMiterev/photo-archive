@@ -3,6 +3,7 @@ package com.example.photoarchive.services;
 import com.example.photoarchive.domain.entities.Photo;
 import com.example.photoarchive.domain.repo.PhotoRepository;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,9 +15,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
@@ -77,17 +76,13 @@ public class FileMetaServiceImpl implements FileMetaService {
 		return repository.findAllByStatusNot(status);
 	}
 
-	static class DateCount {
-		public LocalDate date;
-		public Integer count;
-	}
-	static class YearCount {
-		public String year;
-		public Integer count;
+	private static class DateCount {
+		LocalDate date;
+		Integer count;
 	}
 
 	@Override
-	public Map<LocalDate, Integer> getPhotosStatistics() {
+	public List<Pair<LocalDate, Integer>> getPhotosCountByDate() {
 		ProjectionOperation toDateProjectOperation = Aggregation.project("date")
 				.andExpression("toDate(toLong(date))")
 				.as("formattedServerDate");
@@ -98,21 +93,44 @@ public class FileMetaServiceImpl implements FileMetaService {
 				.as("formattedServerDate");
 
 		Aggregation agg = newAggregation(
-				 match(Criteria.where("date").exists(true))
-				, project().and("date").dateAsFormattedString("%Y-%m-%d").as("year")
-				, project("year").andExpression("toDate(year)").as("year")
-				, group("year").count().as("count")
-				, project("count").and("year").previousOperation()
-				, sort(Sort.Direction.ASC, "year")
+				match(Criteria.where("date").exists(true))
+				, project().and("date").dateAsFormattedString("%Y-%m-%d").as("date")
+				, project("date").andExpression("toDate(date)").as("date")
+				, group("date").count().as("count")
+				, project("count").and("date").previousOperation()
+				, sort(Sort.Direction.ASC, "date")
 		);
-		AggregationResults<YearCount> results = template.aggregate(agg, "photo", YearCount.class);
-		var aaa = results.getMappedResults();
-		HashMap<LocalDate, Integer> map = new HashMap<>();
-		aaa.forEach(d -> {
-			log.debug("{} {}", d.year, d.count);
-//			map.put(d.date, d.count);
-		});
+		AggregationResults<DateCount> results = template.aggregate(agg, "photo", DateCount.class);
+//		results.forEach(r->log.debug(" date {{}} count {{}}", r.date, r.count));
+		return results.getMappedResults().stream().map(r -> Pair.of(r.date, r.count)).toList();
+	}
 
-		return null;
+	private static class StatusCount {
+		String name;
+		Integer count;
+	}
+
+	@Override
+	public List<Pair<String, Integer>> getPhotosCountByStatus() {
+		Aggregation agg = newAggregation(
+				group("status").count().as("count")
+				, project("count").and("status").previousOperation()
+				, project("count").and("status").as("name")
+		);
+		AggregationResults<StatusCount> results = template.aggregate(agg, "photo", StatusCount.class);
+//		results.forEach(r->log.debug("key {{}} value {{}}", r.status, r.count));
+		return results.getMappedResults().stream().map(r -> Pair.of(r.name, r.count)).toList();
+	}
+
+	@Override
+	public List<Pair<String, Integer>> getPhotosCountByMime() {
+		Aggregation agg = newAggregation(
+				group("original.mime").count().as("count")
+				, project("count").and("original.mime").previousOperation()
+				, project("count").and("original.mime").as("name")
+		);
+		AggregationResults<StatusCount> results = template.aggregate(agg, "photo", StatusCount.class);
+		results.forEach(r -> log.debug("key {{}} value {{}}", r.name, r.count));
+		return results.getMappedResults().stream().map(r -> Pair.of(r.name, r.count)).toList();
 	}
 }

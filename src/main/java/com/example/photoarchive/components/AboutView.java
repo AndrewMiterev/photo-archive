@@ -9,6 +9,12 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.ChartType;
+import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -37,10 +43,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Objects;
 
 @Log4j2
 @Route(value = "", layout = MainAppLayout.class)
@@ -76,13 +81,43 @@ public class AboutView extends VerticalLayout {
 				new Div()
 		);
 		add(new H4("Debug section"));
-		add(new Button("Wow!") {{
-			addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-			addClickListener(event -> {
-				Notification.show("Wow pressed!").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-				Map<LocalDate, Integer> histogram = service.getPhotosStatistics();
-			});
-		}});
+		add(new HorizontalLayout(
+				new Button("Wow 1!") {{
+					addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+					addClickListener(event -> {
+						Notification.show("Wow pressed!").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+						var statusStatistics = service.getPhotosCountByStatus();
+
+						Chart chart = new Chart(ChartType.PIE);
+						Configuration conf = chart.getConfiguration();
+						conf.setTitle("Distribution of photos by status");
+
+						PlotOptionsPie options = new PlotOptionsPie();
+						options.setInnerSize("60%");
+//						options.setSize("75%");  // Default
+//						options.setCenter("50%", "50%"); // Default
+						conf.setPlotOptions(options);
+
+						DataSeries series = new DataSeries();
+						conf.addSeries(series);
+						statusStatistics.forEach(s -> {
+							var name = Objects.isNull(s.getKey())? "In permanent storage": s.getKey();
+							var item = new DataSeriesItem(name, s.getValue());
+							if (Objects.isNull(s.getKey())) item.setSliced(true);
+							series.add(item);
+						});
+						add(chart);
+					});
+				}},
+
+				new Button("Wow 2!") {{
+					addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+					addClickListener(event -> {
+						Notification.show("Wow pressed!").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+						var statusStatistics = service.getPhotosCountByMime();
+					});
+				}}
+		));
 		add(new Button("FUTURE: to show generated text file", event -> {
 			final StreamResource resource = new StreamResource("foo.txt",
 					() -> new ByteArrayInputStream("foo".getBytes()));

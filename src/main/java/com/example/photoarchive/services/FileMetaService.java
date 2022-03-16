@@ -1,10 +1,10 @@
 package com.example.photoarchive.services;
 
 import com.example.photoarchive.domain.entities.Photo;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface FileMetaService {
@@ -16,5 +16,7 @@ public interface FileMetaService {
     Integer getCount();
     Photo getPhotoOnIndex(Integer indexNumber);
 	List<Photo> getPhotosWithNotStatus(String status);
-	Map<LocalDate, Integer> getPhotosStatistics();
+	List<Pair<LocalDate, Integer>> getPhotosCountByDate();
+	List<Pair<String, Integer>> getPhotosCountByStatus();
+	List<Pair<String, Integer>> getPhotosCountByMime();
 }
