@@ -47,42 +47,42 @@ public class FilesView extends VerticalLayout {
 		var buttonCalculateHash = new Button("Calculate HASH");
 		buttonCalculateHash.addClickListener(e -> {
 			log.trace("calculate hash pressed");
-			var list = this.service.getPhotosWithStatus("hash");
-			list.forEach(p -> this.processor.processFileHash(p.getHash()));
+			var list = service.getPhotosWithStatus("hash");
+			list.forEach(p -> processor.processFileHash(p.getHash()));
 		});
 		add(buttonCalculateHash);
 
 		var buttonExtractGeo = new Button("Extract Exif information");
 		buttonExtractGeo.addClickListener(e -> {
 			log.trace("extract Exif pressed");
-			var list = this.service.getPhotosWithStatus("exif");
-			list.forEach(this.processor::processExtractExif);
+			var list = service.getPhotosWithStatus("exif");
+			list.forEach(processor::processExtractExif);
 		});
 		add(buttonExtractGeo);
 
 		var buttonGoogle = new Button("Obtain GEO code");
 		buttonGoogle.addClickListener(e -> {
 			log.trace("obtain geocodes pressed");
-			var list = this.service.getPhotosWithStatus("google");
+			var list = service.getPhotosWithStatus("google");
 //            list.stream().findFirst().ifPresent(p->processor.processResolveGeocodes(p));
-			list.forEach(this.processor::processObtainGeocode);
+			list.forEach(processor::processObtainGeocode);
 		});
 		add(buttonGoogle);
 
 		var buttonParse = new Button("Resolve GEO names from GEO codes");
 		buttonParse.addClickListener(e -> {
 			log.trace("resolve GEO names pressed");
-			var list = this.service.getPhotosWithStatus("resolve");
+			var list = service.getPhotosWithStatus("resolve");
 //            list.stream().filter(p -> p.getHash().equalsIgnoreCase("e71106ec2a2534a3d0348c33de1b2d86")).findFirst().ifPresent(p -> processor.processResolveGeocode(p));
-			list.forEach(this.processor::processResolveGeocode);
+			list.forEach(processor::processResolveGeocode);
 		});
 		add(buttonParse);
 
 		var buttonPredict = new Button("Predict names");
 		buttonPredict.addClickListener(e -> {
 			log.trace("predict names pressed");
-			var list = this.service.getPhotosWithStatus("predict");
-			list.forEach(this.processor::processPredict);
+			var list = service.getPhotosWithStatus("predict");
+			list.forEach(processor::processPredict);
 		});
 		add(buttonPredict);
 

@@ -12,9 +12,11 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.Cursor;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
+import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -92,20 +94,28 @@ public class AboutView extends VerticalLayout {
 						Configuration conf = chart.getConfiguration();
 						conf.setTitle("Distribution of photos by status");
 
+						Tooltip tooltip = new Tooltip();
+						conf.setTooltip(tooltip);
+
 						PlotOptionsPie options = new PlotOptionsPie();
-						options.setInnerSize("60%");
+//						options.setInnerSize("60%"); // бублик с дыркой
 //						options.setSize("75%");  // Default
 //						options.setCenter("50%", "50%"); // Default
+						options.setAllowPointSelect(true);
+						options.setCursor(Cursor.POINTER);
+						options.setShowInLegend(true);
 						conf.setPlotOptions(options);
 
 						DataSeries series = new DataSeries();
 						conf.addSeries(series);
+						series.setName("Photos count");
 						statusStatistics.forEach(s -> {
 							var name = Objects.isNull(s.getKey())? "In permanent storage": s.getKey();
 							var item = new DataSeriesItem(name, s.getValue());
 							if (Objects.isNull(s.getKey())) item.setSliced(true);
 							series.add(item);
 						});
+
 						add(chart);
 					});
 				}},

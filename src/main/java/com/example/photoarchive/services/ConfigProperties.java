@@ -42,7 +42,7 @@ public class ConfigProperties {
     private Integer slideshowStartDelayAfterManual;
     @NotNull
     @Min(value = 3, message = "Minimum 3. One for each others previous, current and next")
-    @Max(value = 100)
+    @Max(value = 10000) // todo for debug. 100 on production
     private Integer cacheSizeNumberFiles;
     @NotBlank
     private String corruptedFolder;

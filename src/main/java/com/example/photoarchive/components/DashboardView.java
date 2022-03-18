@@ -45,6 +45,7 @@ public class DashboardView extends Div implements RouterLayout {
 		chartSPLine.setTimeline(true);
 
 		Configuration configuration = chartSPLine.getConfiguration();
+		configuration.getTooltip().setEnabled(true);	// подписываем точку на графике
 
 		DataSeries dataSeries = new DataSeries();
 		dataSeries.setName("Photos by date");

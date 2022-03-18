@@ -41,6 +41,7 @@ public class DropView extends VerticalLayout implements HasComponents {
         upload.setUploadButton(new Button(getTranslation("Upload_files")));
         upload.setDropLabel(new Label(getTranslation("Drop_files")));
         upload.setMaxFileSize(-1);
+        upload.setMaxFiles(-1);
 
 //        ByteArrayOutputStream uploadBuffer = new ByteArrayOutputStream();
 //        upload.setReceiver((fileName, mimeType) -> {
