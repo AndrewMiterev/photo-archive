@@ -353,4 +353,10 @@ public class FileServiceImpl implements FileService {
 	public String getFolderForUnprocessed() {
 		return config.getUnprocessedFolder();
 	}
+
+	@Override
+	public boolean fileExists(String folderName, String fileName) {
+		File file = Paths.get(folderName, fileName).toFile();
+		return file.exists();
+	}
 }

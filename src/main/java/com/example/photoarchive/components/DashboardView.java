@@ -5,12 +5,15 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.Cursor;
 import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.DataSeriesItemTimeline;
 import com.vaadin.flow.component.charts.model.MarkerSymbolEnum;
+import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsTimeline;
+import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLayout;
@@ -37,6 +40,36 @@ public class DashboardView extends Div implements RouterLayout {
 //		layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 //
 //		layout.add(new H1("Dashboard"));
+		var photosByStatusStatistics = service.getPhotosCountByStatus();
+
+		Chart chartPie = new Chart(ChartType.PIE);
+		Configuration pieConfiguration = chartPie.getConfiguration();
+		pieConfiguration.setTitle("Distribution of photos by status");
+
+		Tooltip pieTooltip = new Tooltip();
+		pieConfiguration.setTooltip(pieTooltip);
+
+		PlotOptionsPie pieOptions = new PlotOptionsPie();
+//						options.setInnerSize("60%"); // бублик с дыркой
+//						options.setSize("75%");  // Default
+//						options.setCenter("50%", "50%"); // Default
+		pieOptions.setAllowPointSelect(true);
+		pieOptions.setCursor(Cursor.POINTER);
+		pieOptions.setShowInLegend(true);
+		pieConfiguration.setPlotOptions(pieOptions);
+
+		DataSeries pieSeries = new DataSeries();
+		pieConfiguration.addSeries(pieSeries);
+		pieSeries.setName("Photos count");
+		photosByStatusStatistics.forEach(s -> {
+			var name = Objects.isNull(s.getKey())? "In permanent storage": s.getKey();
+			var item = new DataSeriesItem(name, s.getValue());
+//							if (Objects.isNull(s.getKey())) item.setSliced(true);
+			pieSeries.add(item);
+		});
+
+		add(chartPie);
+
 
 		var clearStatistics = service.getPhotosCountByDate();
 		var preparedStatistics = photosStatisticsWith0(clearStatistics);

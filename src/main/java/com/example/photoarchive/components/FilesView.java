@@ -89,12 +89,12 @@ public class FilesView extends VerticalLayout {
 		var buttonMove = new Button("Move to Permanently space");
 		buttonMove.addClickListener(e -> {
 			log.trace("move to permanently place pressed");
-			var list = this.service.getPhotosWithStatus("move");
-			list.forEach(this.processor::processMove);
+			var list = service.getPhotosWithStatus("move");
+			list.forEach(processor::processMove);
 		});
 		add(buttonMove);
 
-		add(new Button("Re-calculate hash") {{
+		add(new Button("Re-calculate hash and check availability") {{
 			addClickListener(e -> {
 				log.trace("re-calculate files pressed");
 				processor.processCheckCollections();

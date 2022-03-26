@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -133,4 +134,30 @@ public class FileMetaServiceImpl implements FileMetaService {
 		results.forEach(r -> log.debug("key {{}} value {{}}", r.name, r.count));
 		return results.getMappedResults().stream().map(r -> Pair.of(r.name, r.count)).toList();
 	}
+
+	@Override
+	public List<Photo> getPhotosWithStatusNotNullAndStatusNotManual(Integer maxPhotosForRobot) {
+		Query query = Query.query(
+						Criteria.where("status").not().in(null, "manual"))
+				.limit(maxPhotosForRobot);
+		return template.query(Photo.class)
+				.matching(query)
+				.all();
+	}
+
+//	private static class Ids {
+//		String _id;
+//	}
+//
+//	@Override
+//	public List<String> getPhotosWithStatusNotNullAndStatusNotManual(long maxPhotosForRobot) {
+//		Aggregation agg = newAggregation(
+//				match(Criteria.where("status").not().in(null,"manual"))
+//				, project("id")
+//		);
+//		AggregationResults<Ids> results = template.aggregate(agg, "photo", Ids.class);
+//		results.forEach(r->log.debug("{{}}", r._id));
+//
+//		return results.getMappedResults().stream().map(r->r._id).collect(Collectors.toList());
+//	}
 }

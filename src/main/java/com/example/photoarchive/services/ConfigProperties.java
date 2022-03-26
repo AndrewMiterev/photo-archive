@@ -48,4 +48,7 @@ public class ConfigProperties {
     private String corruptedFolder;
     @NotBlank
     private String unprocessedFolder;
+    @Min(value = 1, message = "Minimum 1 photos per 10 minutes")
+    @Max(value = 1000, message = "Maximum 1'000. (Comment from programmer: I think no more loaded photos per scan period, next portion on next iteration)")
+    private Integer processingNumberPhotosAtSameTime;
 }

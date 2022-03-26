@@ -11,4 +11,5 @@ public class ReadableGeoInfo {
     String country;
     String locality;
     String address;
+    String poi;
 }

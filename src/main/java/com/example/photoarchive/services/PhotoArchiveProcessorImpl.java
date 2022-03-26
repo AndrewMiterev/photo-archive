@@ -193,9 +193,17 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 
 	public void processCheckCollections() {
 		log.trace("validate all collections");
+		metaService.getPhotosWithStatus("hash").forEach(p -> {
+			log.debug("check availability file {{}}", p.getName());
+			if (!fileService.fileExists(p.getFolder(), p.getName())) {
+				protocolService.add("Warning", "Photo file not found {%s}, {%s}".formatted(p.getFolder(), p.getName()));
+				log.warn("Photo file not found {}, {}", p.getFolder(), p.getName());
+				metaService.delete(p.getHash());
+			}
+		});
 		metaService.getPhotosWithNotStatus("hash").forEach(p -> {
 			var hash = fileService.calculateHash(p);
-            log.debug("calculated hash {} for {}", hash, p);
+			log.debug("calculated hash {} for {}", hash, p);
 			if (!p.getHash().equals(hash)) {
 				fileService.moveToCorrupted(p);
 				protocolService.add("Warning", "Photo has another hash {%s}, {%s}".formatted(hash, p));

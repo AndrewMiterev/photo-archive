@@ -1,97 +1,92 @@
 package com.example.photoarchive.services;
 
 import com.example.photoarchive.domain.entities.Photo;
-import com.example.photoarchive.tools.RingRandomSequence;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Log4j2
 @EnableScheduling
 public class RobotServiceImpl implements RobotService {
-	private static final long MAX_PHOTOS_FOR_ROBOT = 10;
-	private Queue<Photo> photos = new LinkedList<>();
-	private final AtomicBoolean busy = new AtomicBoolean(false);
-
 	private final FileMetaService service;
 	private final PhotoArchiveProcessor processor;
+	private final ConfigProperties properties;
 
-	public RobotServiceImpl(FileMetaService service, PhotoArchiveProcessor processor) {
+	private final Set<Photo> notReadyPhotos = new CopyOnWriteArraySet<>();
+	private final Set<String> workOnIt = new CopyOnWriteArraySet<>();
+	private final ExecutorService executor = Executors.newFixedThreadPool(1);
+
+	public RobotServiceImpl(FileMetaService service, PhotoArchiveProcessor processor, ConfigProperties properties) {
 		this.service = service;
 		this.processor = processor;
+		this.properties = properties;
 	}
 
-	private void lockAndRun(Runnable action) {
-		if (!busy.compareAndSet(false, true)) return;
-		try {
-			action.run();
-		} finally {
-			busy.set(false);
-		}
-	}
-
-	@PostConstruct
-	private void postConstructor() {
-		load();
-	}
-
-	@Scheduled(fixedDelay = 600000, initialDelay = 60000)
+	@Scheduled(fixedDelayString = "${photo-archive.processing-delay-in-milliseconds:600000}"
+			, initialDelayString = "${photo-archive.processing-initial-delay-in-milliseconds:60000}")
 	@Override
 	public void load() {
-		lockAndRun(() -> {
-			if (!photos.isEmpty()) return;
-			var photosList = service.getPhotosWithNotStatus(null)
-					.stream()
-					.filter(p -> !p.getStatus().equalsIgnoreCase("manual"))
-					.toList();
-			if (photosList.isEmpty()) return;
-			var sequence = new RingRandomSequence(photosList.size());
-			var photos = Stream
-					.iterate(0, i -> sequence.next())
-					.limit(MAX_PHOTOS_FOR_ROBOT)
-					.map(photosList::get)
-					.collect(Collectors.toCollection(LinkedList::new));
-			photos.forEach(d -> log.debug("to process {{}}", d));
-			this.photos = photos;
-		});
+		var maxPhotosForRobot = properties.getProcessingNumberPhotosAtSameTime();
+		var photosList = service.getPhotosWithStatusNotNullAndStatusNotManual(maxPhotosForRobot);
+		log.debug("Number photos for processing {{}}", photosList.size());
+		notReadyPhotos.addAll(photosList);
 	}
 
-	@Scheduled(fixedDelay = 1000)
+	//	@Scheduled(fixedDelay = 1000)
 	@Override
 	public void tick() {
-		AtomicBoolean needReload = new AtomicBoolean(false);
-		lockAndRun(() -> {
-			if (photos.isEmpty()) return;
-			var photo = photos.poll();
-			action(photo);
-			needReload.set(photos.isEmpty());
-		});
-		if (needReload.get()) load();
+		var chain = CompletableFuture
+				.supplyAsync(() -> {
+					var randomPhoto = notReadyPhotos.stream()
+							.filter(p -> !workOnIt.contains(p.getHash()))
+							.findAny()
+							.orElse(null);
+					if (Objects.isNull(randomPhoto)) {
+						log.debug("list of 'not ready photos' is empty");
+						throw new RuntimeException("Empty list 'not ready photos'");
+					}
+					if (!workOnIt.add(randomPhoto.getHash()))
+						throw new RuntimeException("I can't lock hash {%s}".formatted(randomPhoto.getHash()));
+					return randomPhoto;
+				}, executor)
+				.thenApplyAsync(this::action, executor)
+				.thenApplyAsync(photo -> {
+					if (photo.getStatus().isEmpty() || photo.getStatus().equalsIgnoreCase("manual"))
+						notReadyPhotos.remove(photo);
+					return photo;
+				})
+				.whenCompleteAsync((photo, throwable) -> {
+					workOnIt.remove(photo.getHash());
+					if (Objects.nonNull(throwable)) {
+						log.error("{} {}", throwable.getCause(), throwable);
+					}
+				}, executor);
 	}
 
-	private void action(Photo photo) {
+	private Photo action(Photo photo) {
 		log.debug("action {{}} photo {{}}", photo.getStatus(), photo);
-		switch (photo.getStatus()) {
-			case "hash" -> processor.processFileHash(photo.getHash());
-			case "exif" -> processor.processExtractExif(photo);
-			case "google" -> processor.processObtainGeocode(photo);
-			case "resolve" -> processor.processResolveGeocode(photo);
-			case "predict" -> processor.processPredict(photo);
-			case "move" -> processor.processMove(photo);
-			default -> {
-				var error = "Undefined process %s".formatted(photo.getStatus());
-				log.error(error);
-				throw new RuntimeException(error);
-			}
-		}
+//		switch (photo.getStatus()) {
+//			case "hash" -> processor.processFileHash(photo.getHash());
+//			case "exif" -> processor.processExtractExif(photo);
+//			case "google" -> processor.processObtainGeocode(photo);
+//			case "resolve" -> processor.processResolveGeocode(photo);
+//			case "predict" -> processor.processPredict(photo);
+//			case "move" -> processor.processMove(photo);
+//			default -> {
+//				var error = "Undefined process '%s'".formatted(photo.getStatus());
+//				log.error(error);
+//				throw new RuntimeException(error);
+//			}
+//		}
+		return photo;
 	}
 }

@@ -19,4 +19,5 @@ public interface FileMetaService {
 	List<Pair<LocalDate, Integer>> getPhotosCountByDate();
 	List<Pair<String, Integer>> getPhotosCountByStatus();
 	List<Pair<String, Integer>> getPhotosCountByMime();
+	List<Photo> getPhotosWithStatusNotNullAndStatusNotManual(Integer maxPhotosForRobot);
 }

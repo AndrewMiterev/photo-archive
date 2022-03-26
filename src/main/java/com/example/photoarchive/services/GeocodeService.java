@@ -7,4 +7,5 @@ public interface GeocodeService {
     String get(Geo geo);
     ReadableGeoInfo resolve(String geocode);
     String status(String geocode);
+	String update(Geo geo);
 }

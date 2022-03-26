@@ -56,7 +56,7 @@ public class SlideshowServiceImpl implements SlideshowService {
 					.stream()
 					.filter(this::isaPhotoImage)
 					.toArray(Photo[]::new);
-			log.trace("Photos list received");
+			log.trace("Photos list received. Total in loop {{}} photos", photos.length);
 			return photos;
 		}).thenAcceptAsync(a -> {
 			photos = a;

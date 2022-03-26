@@ -29,4 +29,5 @@ public interface FileService {
     void moveToUnprocessed(String folderName, String fileName);
     void iteratePossibleFolders(BiConsumer<String, String> fileConsumer);
     String getFolderForUnprocessed();
+    boolean fileExists(String folderName, String fileName);
 }

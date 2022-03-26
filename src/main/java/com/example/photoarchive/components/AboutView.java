@@ -1,5 +1,6 @@
 package com.example.photoarchive.components;
 
+import com.example.photoarchive.experiment.GeoConvertor;
 import com.example.photoarchive.services.FileMetaService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -9,14 +10,6 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.ChartType;
-import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.Cursor;
-import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.charts.model.DataSeriesItem;
-import com.vaadin.flow.component.charts.model.PlotOptionsPie;
-import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -47,7 +40,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Objects;
 
 @Log4j2
 @Route(value = "", layout = MainAppLayout.class)
@@ -57,9 +49,11 @@ import java.util.Objects;
 public class AboutView extends VerticalLayout {
 
 	private final FileMetaService service;
+	private final GeoConvertor convertor;
 
-	public AboutView(FileMetaService service) {
+	public AboutView(FileMetaService service, GeoConvertor convertor) {
 		this.service = service;
+		this.convertor = convertor;
 
 		setSpacing(false);
 		add(new HorizontalLayout(
@@ -88,35 +82,7 @@ public class AboutView extends VerticalLayout {
 					addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 					addClickListener(event -> {
 						Notification.show("Wow pressed!").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-						var statusStatistics = service.getPhotosCountByStatus();
-
-						Chart chart = new Chart(ChartType.PIE);
-						Configuration conf = chart.getConfiguration();
-						conf.setTitle("Distribution of photos by status");
-
-						Tooltip tooltip = new Tooltip();
-						conf.setTooltip(tooltip);
-
-						PlotOptionsPie options = new PlotOptionsPie();
-//						options.setInnerSize("60%"); // бублик с дыркой
-//						options.setSize("75%");  // Default
-//						options.setCenter("50%", "50%"); // Default
-						options.setAllowPointSelect(true);
-						options.setCursor(Cursor.POINTER);
-						options.setShowInLegend(true);
-						conf.setPlotOptions(options);
-
-						DataSeries series = new DataSeries();
-						conf.addSeries(series);
-						series.setName("Photos count");
-						statusStatistics.forEach(s -> {
-							var name = Objects.isNull(s.getKey())? "In permanent storage": s.getKey();
-							var item = new DataSeriesItem(name, s.getValue());
-							if (Objects.isNull(s.getKey())) item.setSliced(true);
-							series.add(item);
-						});
-
-						add(chart);
+						convertor.calculate();
 					});
 				}},
 
