@@ -1,6 +1,5 @@
 package com.example.photoarchive.components;
 
-import com.example.photoarchive.experiment.GeoConvertor;
 import com.example.photoarchive.services.FileMetaService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -49,11 +48,9 @@ import java.util.Iterator;
 public class AboutView extends VerticalLayout {
 
 	private final FileMetaService service;
-	private final GeoConvertor convertor;
 
-	public AboutView(FileMetaService service, GeoConvertor convertor) {
+	public AboutView(FileMetaService service) {
 		this.service = service;
-		this.convertor = convertor;
 
 		setSpacing(false);
 		add(new HorizontalLayout(
@@ -82,7 +79,6 @@ public class AboutView extends VerticalLayout {
 					addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 					addClickListener(event -> {
 						Notification.show("Wow pressed!").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-						convertor.calculate();
 					});
 				}},
 
