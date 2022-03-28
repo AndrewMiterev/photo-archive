@@ -3,42 +3,62 @@
     {
       "name": "photo-archive.in-folder",
       "type": "java.lang.String",
-      "description": "folder for storing all input files"
+      "description": "folder for storing all input files."
     },
     {
       "name": "photo-archive.duplicate-folder",
       "type": "java.lang.String",
-      "description": "folder for storing files with same hash"
+      "description": "folder for storing files with same hash."
     },
     {
       "name": "photo-archive.processing-folder",
       "type": "java.lang.String",
-      "description": "folder for storing files for processing"
+      "description": "folder for storing files for processing."
     },
     {
       "name": "photo-archive.manual-folder",
       "type": "java.lang.String",
-      "description": "folder for storing files without GEO information and manual distribution"
+      "description": "folder for storing files without GEO information and manual distribution."
     },
     {
       "name": "photo-archive.permanent-folder",
       "type": "java.lang.String",
-      "description": "folder for storing files permanently"
+      "description": "folder for storing files permanently."
     },
     {
       "name": "photo-archive.google-api-key",
       "type": "java.lang.String",
-      "description": "API Google key for reverse GEOcode"
+      "description": "API Google key for reverse GEO code."
     },
     {
       "name": "photo-archive.default-language",
       "type": "java.lang.String",
-      "description": "Language for request addresses from google and for resolving mohth names"
+      "description": "Language for request addresses from google and for resolving month names."
     },
     {
       "name": "photo-archive.forbidden-folder-symbols-regex",
       "type": "java.lang.String",
-      "description": "Regex: Forbidden characters for naming folders. All symbols, filtered by regex, will be truncated. It is forbidden to define symbols: ' '(space), '-' and '_'"
+      "description": "Regex: Forbidden characters for naming folders. All symbols, filtered by regex, will be truncated. It is forbidden to define symbols: ' '(space), '-' and '_'."
+    },
+    {
+      "name": "photo-archive.processing-load-delay-in-milliseconds",
+      "type": "java.lang.Integer",
+      "description": "Delay for scheduler robot service scaner."
+    },
+    {
+      "name": "photo-archive.processing-initial-load-delay-in-milliseconds",
+      "type": "java.lang.Integer",
+      "description": "Initial delay for scheduler robot service scaner."
+    },
+    {
+      "name": "photo-archive.processing-tick-delay-in-milliseconds",
+      "type": "java.lang.Integer",
+      "description": "Delay for scheduler robot service tick."
+    },
+    {
+      "name": "photo-archive.processing-initial-tick-delay-in-milliseconds",
+      "type": "java.lang.Integer",
+      "description": "Initial delay for scheduler robot service tick."
     }
   ]
 }

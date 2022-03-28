@@ -3,6 +3,8 @@ package com.example.photoarchive.services;
 import com.example.photoarchive.domain.entities.Original;
 import com.example.photoarchive.domain.entities.Photo;
 import com.example.photoarchive.domain.entities.PredictName;
+import com.example.photoarchive.domain.repo.PhotoRepository;
+import com.example.photoarchive.domain.repo.ProtocolRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -18,22 +20,28 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 	private final ProtocolService protocolService;
 	private final GeocodeService geoService;
 	private final PredictService predictService;
+	private final PhotoRepository photoRepository;
+	private final ProtocolRepository protocolRepository;
 
 	public PhotoArchiveProcessorImpl(FileService fileService, FileMetaService metaService,
 									 ProtocolService protocolService, GeocodeService geoService,
-									 PredictService predictService) {
+									 PredictService predictService, PhotoRepository photoRepository, ProtocolRepository protocolRepository) {
 		this.fileService = fileService;
 		this.metaService = metaService;
 		this.protocolService = protocolService;
 		this.geoService = geoService;
 		this.predictService = predictService;
+		this.photoRepository = photoRepository;
+		this.protocolRepository = protocolRepository;
 	}
 
 	@Override
 	public void processClearAllCollections() {
 		log.trace("clear all collections");
-		metaService.getAllPhoto().forEach(p -> metaService.delete(p.getHash()));
-		protocolService.getAll().forEach(protocolService::delete);
+		photoRepository.deleteAll();
+		protocolRepository.deleteAll();
+//		metaService.getAllPhoto().forEach(p -> metaService.delete(p.getHash()));
+//		protocolService.getAll().forEach(protocolService::delete);
 	}
 
 	@Override
