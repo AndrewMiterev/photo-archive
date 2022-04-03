@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -41,54 +42,59 @@ public class RobotServiceImpl implements RobotService {
 			initialDelayString = "${photo-archive.processing-load-initial-delay-in-milliseconds:0}")
 	@Override
 	public void load() {
-		if (notReadyPhotos.size() == 0) workOnIt.clear();        // clear accumulated errors (throws e.t.s.)
-		var maxPhotosForRobot = properties.getProcessingNumberPhotosAtSameTime();
-		var photosList = service.getPhotosWithStatusNotNullAndStatusNotManual(maxPhotosForRobot)
-				.stream()
-				.map(Photo::getHash)
-				.toList();
+		var oneLoadProcess = CompletableFuture.runAsync(() -> {
+			var maxPhotosForRobot = properties.getProcessingNumberPhotosAtSameTime();
+			var photosList = service.getPhotosWithStatusNotNullAndStatusNotManual(maxPhotosForRobot)
+					.stream()
+					.map(Photo::getHash)
+					.toList();
+			// clear accumulated errors (throws e.t.s.)
+			if (notReadyPhotos.size() == 0 && photosList.isEmpty()) workOnIt.clear();
 //		log.debug("Number photos for processing {{}}", photosList.size());
-		notReadyPhotos.addAll(photosList);
+			notReadyPhotos.addAll(photosList);
+		}, executor);
 	}
 
 	@Scheduled(fixedDelayString = "${photo-archive.processing-tick-delay-in-milliseconds:0}",
 			initialDelayString = "${photo-archive.processing-tick-initial-delay-in-milliseconds:0}")
 	@Override
 	public void tick() {
-		notReadyPhotos.stream()
-				.filter(hash -> !workOnIt.contains(hash))
-				.findAny()
-				.flatMap(service::getPhoto)
-				.ifPresent(this::process);
-//				.ifPresentOrElse(this::process, () -> log.trace("no photo to processing"));
+		var onePhotoProcess = CompletableFuture.runAsync(() ->
+			notReadyPhotos.stream()
+					.filter(hash -> !workOnIt.contains(hash))
+					.findAny()
+					.ifPresent(this::process)
+		, executor);
 	}
 
-	private void process(Photo photoToProcess) {
-		var chain = CompletableFuture.completedFuture(photoToProcess)
-				.thenApplyAsync(photo -> {
-					if (!workOnIt.add(photo.getHash()))
-						throw new RuntimeException("I can't lock photo with hash {%s}".formatted(photo.getHash()));
-					return photo;
-				}, executor)
+	private void process(String photoHash) {
+		var chain = CompletableFuture.completedFuture(photoHash)
+				.thenApplyAsync(this::lockHash, executor)
+				.thenApplyAsync(service::getPhoto, executor)
+				.thenApplyAsync(Optional::orElseThrow, executor)
 				.thenApplyAsync(this::action, executor)
 				.thenApplyAsync(photo -> {
 					var hash = photo.getHash();
 					service.getPhoto(hash).ifPresentOrElse(p -> {
-						log.debug("new status of photo {{}} {{}}", p.getStatus(), p);
-						if (Objects.isNull(p.getStatus()) || photo.getStatus().equalsIgnoreCase("manual"))
+						if (Objects.isNull(p.getStatus()) || p.getStatus().equalsIgnoreCase("manual"))
 							notReadyPhotos.remove(hash);
-					}, () -> {
-//						log.trace("duplicate?");
-						notReadyPhotos.remove(hash);
-					});
-					return photo;
-				})
-				.whenCompleteAsync((photo, throwable) -> {
-					if (Objects.nonNull(photo))
-						workOnIt.remove(photo.getHash());
-					if (Objects.nonNull(throwable))
-						log.error("{} {}", throwable.getCause(), throwable);
+					}, () -> notReadyPhotos.remove(hash));
+					return hash;
+				}, executor)
+				.whenCompleteAsync((hash, throwable) -> {
+					if (Objects.nonNull(hash))
+						if (!workOnIt.remove(hash))
+							log.error("!!! Unrecoverable error! lock free error!");
+					if (Objects.nonNull(throwable)) {
+						if (!(throwable instanceof LockException))
+							log.error("exception {{}} error {{}}", throwable.getCause(), throwable);
+					}
 				}, executor);
+	}
+
+	private String lockHash(String hash) {
+		if (!workOnIt.add(hash)) throw new LockException(hash);
+		return hash;
 	}
 
 	private Photo action(Photo photo) {

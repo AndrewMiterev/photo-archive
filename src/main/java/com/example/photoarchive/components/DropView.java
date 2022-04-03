@@ -16,6 +16,7 @@ import elemental.json.Json;
 import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.security.PermitAll;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
@@ -25,23 +26,23 @@ import java.util.concurrent.TimeUnit;
 @Route(value = "drop", layout = MainAppLayout.class)
 @PermitAll
 public class DropView extends VerticalLayout implements HasComponents {
-    private final PhotoArchiveProcessor processorService;
-    private final AuthenticatedUser securityService;
+	private final PhotoArchiveProcessor processorService;
+	private final AuthenticatedUser securityService;
 
-    private String getUsername() {
-        return securityService.get().map(User::getUsername).orElse("");
-    }
+	private String getUsername() {
+		return securityService.get().map(User::getUsername).orElse("");
+	}
 
-    public DropView(PhotoArchiveProcessor processorService, AuthenticatedUser securityService) {
-        this.processorService = processorService;
-        this.securityService = securityService;
+	public DropView(PhotoArchiveProcessor processorService, AuthenticatedUser securityService) {
+		this.processorService = processorService;
+		this.securityService = securityService;
 
-        MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
-        Upload upload = new Upload(buffer);
-        upload.setUploadButton(new Button(getTranslation("Upload_files")));
-        upload.setDropLabel(new Label(getTranslation("Drop_files")));
-        upload.setMaxFileSize(-1);
-        upload.setMaxFiles(-1);
+		MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
+		Upload upload = new Upload(buffer);
+		upload.setUploadButton(new Button(getTranslation("Upload_files")));
+		upload.setDropLabel(new Label(getTranslation("Drop_files")));
+		upload.setMaxFileSize(-1);
+		upload.setMaxFiles(-1);
 
 //        ByteArrayOutputStream uploadBuffer = new ByteArrayOutputStream();
 //        upload.setReceiver((fileName, mimeType) -> {
@@ -50,33 +51,36 @@ public class DropView extends VerticalLayout implements HasComponents {
 //        });
 
 
-        upload.addAllFinishedListener(e ->
-                Executors.newScheduledThreadPool(1).schedule(() ->
-                        upload.getUI().ifPresent(ui ->
-                                ui.access(() ->
-                                        upload.getElement().setPropertyJson("files", Json.createArray())
-                                )), 3, TimeUnit.SECONDS)
-        );
+		upload.addAllFinishedListener(e ->
+				Executors.newScheduledThreadPool(1).schedule(() ->
+						upload.getUI().ifPresent(ui ->
+								ui.access(() ->
+										upload.getElement().setPropertyJson("files", Json.createArray())
+								)), 3, TimeUnit.SECONDS)
+		);
 
-        upload.addFinishedListener(e -> {
-            String fileName = e.getFileName();
-            Long contentLength = e.getContentLength();
-            String mimeType = e.getMIMEType();
-            InputStream stream = buffer.getInputStream(fileName);
-            var added = processorService.storeNewFile("drop", stream, fileName, mimeType, contentLength, LocalDateTime.now(), getUsername());
+		upload.addFinishedListener(e -> {
+			String fileName = e.getFileName();
+			Long contentLength = e.getContentLength();
+			String mimeType = e.getMIMEType();
+			try (InputStream stream = buffer.getInputStream(fileName)) {
+				var added = processorService.storeNewFile("drop", stream, fileName, mimeType, contentLength, LocalDateTime.now(), getUsername());
 
-            Notification notification = Notification.show(getTranslation("File_uploaded") + fileName);
-            notification.setPosition(Notification.Position.BOTTOM_CENTER);
-            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            if (!added) {
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.setDuration(notification.getDuration() * 3);
-            }
-        });
+				Notification notification = Notification.show(getTranslation("File_uploaded") + fileName);
+				notification.setPosition(Notification.Position.BOTTOM_CENTER);
+				notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+				if (!added) {
+					notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+					notification.setDuration(notification.getDuration() * 3);
+				}
+			} catch (IOException ex) {
+				log.error("error on finished listener {{}}", ex.getMessage());
+			}
+		});
 
-        add(upload);
+		add(upload);
 
-        setAlignItems(Alignment.STRETCH);
-        setWidthFull();
-    }
+		setAlignItems(Alignment.STRETCH);
+		setWidthFull();
+	}
 }

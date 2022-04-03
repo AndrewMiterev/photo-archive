@@ -59,7 +59,7 @@ public class ConfigProperties {
     private Integer processingLoadDelayInMilliseconds;
     @Min(value = 1000, message = "Minimum initial delay load process scaner. [1000 milliseconds-...]")
     private Integer processingLoadInitialDelayInMilliseconds;
-    @Min(value = 100, message = "Minimum delay tick process scaner. [100 milliseconds-...]")
+    @Min(value = 10, message = "Minimum delay tick process scaner. [100 milliseconds-...]")
     private Integer processingTickDelayInMilliseconds;
     @Min(value = 100, message = "Minimum initial delay tick process scaner. [100 milliseconds-...]")
     private Integer processingTickInitialDelayInMilliseconds;
