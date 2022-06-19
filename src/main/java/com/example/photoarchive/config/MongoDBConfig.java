@@ -14,16 +14,16 @@ import javax.annotation.PostConstruct;
 @Configuration
 @RequiredArgsConstructor
 public class MongoDBConfig implements InitializingBean {
-    @Lazy
-    private final MappingMongoConverter converter;
+	@Lazy
+	private final MappingMongoConverter converter;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        converter.setTypeMapper(new DefaultMongoTypeMapper(null));
-    }
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		converter.setTypeMapper(new DefaultMongoTypeMapper(null));
+	}
 
-    @PostConstruct
-    void postConstruct() {
-        log.info("MongoDB configuration: saving without names of classes ...");
-    }
+	@PostConstruct
+	void postConstruct() {
+		log.info("MongoDB configuration: saving without names of classes ...");
+	}
 }
