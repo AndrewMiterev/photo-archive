@@ -1,19 +1,21 @@
 package com.example.photoarchive.services;
 
 import com.example.photoarchive.domain.entities.Photo;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @Log4j2
@@ -38,8 +40,8 @@ public class RobotServiceImpl implements RobotService {
 		executor = Executors.newFixedThreadPool(properties.getProcessingThreads());
 	}
 
-	@Scheduled(fixedDelayString = "${photo-archive.processing-load-delay-in-milliseconds:0}",
-			initialDelayString = "${photo-archive.processing-load-initial-delay-in-milliseconds:0}")
+//	@Scheduled(fixedDelayString = "${photo-archive.processing-load-delay-in-milliseconds:0}",
+//			initialDelayString = "${photo-archive.processing-load-initial-delay-in-milliseconds:0}")
 	@Override
 	public void load() {
 		var oneLoadProcess = CompletableFuture.runAsync(() -> {
@@ -50,13 +52,14 @@ public class RobotServiceImpl implements RobotService {
 					.toList();
 			// clear accumulated errors (throws e.t.s.)
 			if (notReadyPhotos.size() == 0 && photosList.isEmpty()) workOnIt.clear();
-//		log.debug("Number photos for processing {{}}", photosList.size());
+			if (photosList.isEmpty()) return;
+			log.debug("Number photos for processing {{}}", photosList.size());
 			notReadyPhotos.addAll(photosList);
 		}, executor);
 	}
 
-	@Scheduled(fixedDelayString = "${photo-archive.processing-tick-delay-in-milliseconds:0}",
-			initialDelayString = "${photo-archive.processing-tick-initial-delay-in-milliseconds:0}")
+//	@Scheduled(fixedDelayString = "${photo-archive.processing-tick-delay-in-milliseconds:0}",
+//			initialDelayString = "${photo-archive.processing-tick-initial-delay-in-milliseconds:0}")
 	@Override
 	public void tick() {
 		var onePhotoProcess = CompletableFuture.runAsync(() ->
@@ -86,17 +89,18 @@ public class RobotServiceImpl implements RobotService {
 						if (!workOnIt.remove(hash))
 							log.error("!!! Unrecoverable error! lock free error!");
 					if (Objects.nonNull(throwable)) {
-						if (!(throwable instanceof LockException))
-							log.error("exception {{}} error {{}}", throwable.getCause(), throwable);
+						if (throwable.getCause() instanceof CancellationException) return;
+						log.error("exception {{}} error {{}}", throwable.getCause(), throwable);
 					}
 				}, executor);
 	}
 
 	private String lockHash(String hash) {
-		if (!workOnIt.add(hash)) throw new LockException(hash);
+		if (!workOnIt.add(hash)) throw new CancellationException(hash);
 		return hash;
 	}
 
+	@SneakyThrows
 	private Photo action(Photo photo) {
 		log.debug("action {{}} photo {{}}", photo.getStatus(), photo);
 		switch (photo.getStatus()) {
@@ -112,6 +116,16 @@ public class RobotServiceImpl implements RobotService {
 				throw new RuntimeException(error);
 			}
 		}
+//		executorUsage();
 		return photo;
+	}
+
+	public Integer executorUsage() {
+		if (executor instanceof ThreadPoolExecutor pool) {
+			log.debug("pool.getActiveCount() {{}}", pool.getActiveCount());
+			log.debug("not ready photos {{}} {{}}",notReadyPhotos.size(),workOnIt.size());
+			return pool.getActiveCount();
+		}
+		return 0;
 	}
 }

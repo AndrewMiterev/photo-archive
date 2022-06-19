@@ -18,7 +18,6 @@ import lombok.extern.log4j.Log4j2;
 import javax.annotation.security.PermitAll;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -41,8 +40,8 @@ public class DropView extends VerticalLayout implements HasComponents {
 		Upload upload = new Upload(buffer);
 		upload.setUploadButton(new Button(getTranslation("Upload_files")));
 		upload.setDropLabel(new Label(getTranslation("Drop_files")));
-		upload.setMaxFileSize(-1);
-		upload.setMaxFiles(-1);
+//		upload.setMaxFileSize(0);
+//		upload.setMaxFiles(0);
 
 //        ByteArrayOutputStream uploadBuffer = new ByteArrayOutputStream();
 //        upload.setReceiver((fileName, mimeType) -> {
@@ -63,16 +62,21 @@ public class DropView extends VerticalLayout implements HasComponents {
 			String fileName = e.getFileName();
 			Long contentLength = e.getContentLength();
 			String mimeType = e.getMIMEType();
-			try (InputStream stream = buffer.getInputStream(fileName)) {
-				var added = processorService.storeNewFile("drop", stream, fileName, mimeType, contentLength, LocalDateTime.now(), getUsername());
 
-				Notification notification = Notification.show(getTranslation("File_uploaded") + fileName);
-				notification.setPosition(Notification.Position.BOTTOM_CENTER);
-				notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-				if (!added) {
-					notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-					notification.setDuration(notification.getDuration() * 3);
-				}
+			Notification notification = Notification.show(getTranslation("File_uploaded") + fileName);
+			notification.setPosition(Notification.Position.BOTTOM_CENTER);
+			notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+			try (InputStream stream = buffer.getInputStream(fileName)) {
+//				var added = processorService.storeNewFile("drop", stream, fileName, mimeType, contentLength, LocalDateTime.now(), getUsername());
+//
+//				Notification notification = Notification.show(getTranslation("File_uploaded") + fileName);
+//				notification.setPosition(Notification.Position.BOTTOM_CENTER);
+//				notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+//				if (!added) {
+//					notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+//					notification.setDuration(notification.getDuration() * 3);
+//				}
 			} catch (IOException ex) {
 				log.error("error on finished listener {{}}", ex.getMessage());
 			}

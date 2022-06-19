@@ -8,7 +8,9 @@ import com.example.photoarchive.domain.repo.ProtocolRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.NoSuchFileException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -71,7 +73,7 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 	}
 
 	@Override
-	public void processFileHash(String id) {
+	public void processFileHash(String id) throws IOException {
 		log.trace("hashing process for {{}}", id);
 		Photo photo = metaService.getPhoto(id)
 				.filter(p -> Objects.nonNull(p.getStatus()))
@@ -210,13 +212,21 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 			}
 		});
 		metaService.getPhotosWithNotStatus("hash").forEach(p -> {
-			var hash = fileService.calculateHash(p);
-			log.debug("calculated hash {} for {}", hash, p);
-			if (!p.getHash().equals(hash)) {
-				fileService.moveToCorrupted(p);
-				protocolService.add("Warning", "Photo has another hash {%s}, {%s}".formatted(hash, p));
-				log.warn("Photo has another hash {}, {}", hash, p);
+			try {
+				var hash = fileService.calculateHash(p);
+				log.debug("calculated hash {} for {}", hash, p);
+				if (!p.getHash().equals(hash)) {
+					fileService.moveToCorrupted(p);
+					protocolService.add("Warning", "Photo has another hash {%s}, {%s}".formatted(hash, p));
+					log.warn("Photo has another hash {}, {}", hash, p);
+					metaService.delete(p.getHash());
+				}
+			} catch (NoSuchFileException e) {
+				protocolService.add("Warning", "Photo not found {%s}".formatted(p));
+				log.warn("Photo not found {}", p);
 				metaService.delete(p.getHash());
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		});
 	}
@@ -225,12 +235,20 @@ public class PhotoArchiveProcessorImpl implements PhotoArchiveProcessor {
 		log.trace("scan permanent folder for unlinked files");
 		fileService.iteratePossibleFolders((folderName, fileName) -> {
 //			log.debug("check consumer take folder {{}} and file {{}}", folderName, fileName);
-			var hash = fileService.calculateHash(folderName, fileName);
+			String hash = null;
+			try {
+				hash = fileService.calculateHash(folderName, fileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 //			log.debug("hash is {{}}", hash);
 			var photo = metaService.getPhoto(hash);
 //			log.debug("photo {{}}", photo);
 			if (photo.isEmpty()) {
-				fileService.moveToUnprocessed(folderName, fileName);
+				try {
+					fileService.moveToUnprocessed(folderName, fileName);
+				} catch (IOException ignored) {
+				}
 				protocolService.add("Warning", "File not presented in meta {%s} {%s}".formatted(folderName, fileName));
 				log.warn("File not presented in meta moved to unprocessed {{}} {{}} {{}}", folderName, fileName, fileService.getFolderForUnprocessed());
 			}

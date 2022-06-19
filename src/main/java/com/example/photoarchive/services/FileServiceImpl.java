@@ -133,16 +133,14 @@ public class FileServiceImpl implements FileService {
 	}
 
 	@Override
-	public String calculateHash(Photo photo) {
+	public String calculateHash(Photo photo) throws IOException {
 		return calculateHash(photo.getFolder(), photo.getName());
 	}
 
 	@Override
-	public String calculateHash(String folderName, String fileName) {
+	public String calculateHash(String folderName, String fileName) throws IOException {
 		try (InputStream is = Files.newInputStream(Paths.get(folderName, fileName))) {
 			return DigestUtils.md5Hex(is);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
 
@@ -310,12 +308,12 @@ public class FileServiceImpl implements FileService {
 	}
 
 	@Override
-	public void moveToCorrupted(Photo photo) {
+	public void moveToCorrupted(Photo photo) throws IOException {
 		moveToWithPrefix(photo, getFolderForCorrupted(), "corrupted-%s-".formatted(calculateHash(photo)));
 	}
 
 	@Override
-	public void moveToUnprocessed(String folderName, String fileName) {
+	public void moveToUnprocessed(String folderName, String fileName) throws IOException {
 		moveTo(folderName, fileName, getFolderForUnprocessed(), "unprocessed-%s-%s".formatted(calculateHash(folderName, fileName), fileName));
 	}
 

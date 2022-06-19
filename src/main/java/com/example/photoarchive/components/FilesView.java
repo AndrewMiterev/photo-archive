@@ -10,6 +10,7 @@ import com.vaadin.flow.router.Route;
 import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.security.RolesAllowed;
+import java.io.IOException;
 
 @Log4j2
 @Route(value = "files", layout = MainAppLayout.class)
@@ -48,7 +49,12 @@ public class FilesView extends VerticalLayout {
 		buttonCalculateHash.addClickListener(e -> {
 			log.trace("calculate hash pressed");
 			var list = service.getPhotosWithStatus("hash");
-			list.forEach(p -> processor.processFileHash(p.getHash()));
+			list.forEach(p -> {
+				try {
+					processor.processFileHash(p.getHash());
+				} catch (IOException ignored) {
+				}
+			});
 		});
 		add(buttonCalculateHash);
 
