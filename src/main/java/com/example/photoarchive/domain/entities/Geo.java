@@ -8,7 +8,7 @@ import lombok.ToString;
 @ToString
 @Getter
 public class Geo {
-    private double latitude;
-    private double longitude;
-    private Double altitude;
+	private double latitude;
+	private double longitude;
+	private Double altitude;
 }

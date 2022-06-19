@@ -102,7 +102,7 @@ public class ConfirmDialog extends Dialog {
 		}
 	}
 
-//	public static class RejectEvent extends ComponentEvent<ConfirmDialog> {
+	//	public static class RejectEvent extends ComponentEvent<ConfirmDialog> {
 //		public RejectEvent(ConfirmDialog source) {
 //			super(source, true);
 //		}

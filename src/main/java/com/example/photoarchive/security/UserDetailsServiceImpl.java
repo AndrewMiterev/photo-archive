@@ -12,20 +12,20 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private final UserRepository userRepository;
+	private final UserRepository userRepository;
 
-    public UserDetailsServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+	public UserDetailsServiceImpl(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findById(username)
-                .orElseThrow(() -> new UsernameNotFoundException("No user present with username: %s".formatted(username)));
-        return new User(user.getUsername(), user.getPassword(), user.getRoles()
-                .stream()
-                .map(r -> new SimpleGrantedAuthority("ROLE_%s".formatted(r.getRoleName())))
-                .collect(Collectors.toList())
-        );
-    }
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		var user = userRepository.findById(username)
+				.orElseThrow(() -> new UsernameNotFoundException("No user present with username: %s".formatted(username)));
+		return new User(user.getUsername(), user.getPassword(), user.getRoles()
+				.stream()
+				.map(r -> new SimpleGrantedAuthority("ROLE_%s".formatted(r.getRoleName())))
+				.collect(Collectors.toList())
+		);
+	}
 }

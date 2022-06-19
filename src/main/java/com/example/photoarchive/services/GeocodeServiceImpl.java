@@ -159,12 +159,12 @@ public class GeocodeServiceImpl implements GeocodeService {
 		localities.addAll(admin2);
 		localities.addAll(admin1);
 		localities.addAll(country);
-		if (localities.isEmpty()) localities.addAll(route);		// at least fill it with something from route
+		if (localities.isEmpty()) localities.addAll(route);        // at least fill it with something from route
 
 		Set<String> addresses = new LinkedHashSet<>();
 		if (address.isEmpty()) addresses.addAll(route);
 		addresses.addAll(address.stream().findFirst().stream().toList());
-		if (addresses.isEmpty()) addresses.addAll(localities);		// at least fill it with something
+		if (addresses.isEmpty()) addresses.addAll(localities);        // at least fill it with something
 
 		return ReadableGeoInfo.builder()
 				.country(String.join(", ", country))

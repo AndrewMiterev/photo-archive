@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 public class PredictName {
-    String folder;
-    String subFolder;
-    String subSubFolder;
-    String name;
-    String title;
-    LocalDateTime date;
+	String folder;
+	String subFolder;
+	String subSubFolder;
+	String name;
+	String title;
+	LocalDateTime date;
 }

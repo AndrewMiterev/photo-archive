@@ -1,6 +1,10 @@
 package com.example.photoarchive.experiment;
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.ClickNotifier;
+import com.vaadin.flow.component.HtmlContainer;
+import com.vaadin.flow.component.PropertyDescriptor;
+import com.vaadin.flow.component.PropertyDescriptors;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.server.StreamResource;
 
 @Tag("video1")
@@ -22,6 +26,7 @@ public class Video1 extends HtmlContainer implements ClickNotifier<com.vaadin.fl
 	public void setSrc(StreamResource resource) {
 		getElement().setAttribute("src", resource);
 	}
+
 	public Video1(String src) {
 		setSrc(src);
 		getElement().setProperty("controls", true);

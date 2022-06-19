@@ -13,17 +13,17 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 
 @Service
 public class MongoIdGeneratorImpl implements MongoIdGenerator {
-    private final MongoOperations mongoOperations;
+	private final MongoOperations mongoOperations;
 
-    public MongoIdGeneratorImpl(MongoOperations mongoOperations) {
-        this.mongoOperations = mongoOperations;
-    }
+	public MongoIdGeneratorImpl(MongoOperations mongoOperations) {
+		this.mongoOperations = mongoOperations;
+	}
 
-    @Override
-    public long generateSequence(String seqName) {
-        Sequence counter = mongoOperations.findAndModify(query(where("_id").is(seqName)),
-                new Update().inc("number",1), options().returnNew(true).upsert(true),
-                Sequence.class);
-        return !Objects.isNull(counter) ? counter.getNumber() : 1;
-    }
+	@Override
+	public long generateSequence(String seqName) {
+		Sequence counter = mongoOperations.findAndModify(query(where("_id").is(seqName)),
+				new Update().inc("number", 1), options().returnNew(true).upsert(true),
+				Sequence.class);
+		return !Objects.isNull(counter) ? counter.getNumber() : 1;
+	}
 }

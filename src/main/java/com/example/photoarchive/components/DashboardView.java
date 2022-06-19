@@ -62,7 +62,7 @@ public class DashboardView extends Div implements RouterLayout {
 		pieConfiguration.addSeries(pieSeries);
 		pieSeries.setName("Photos count");
 		photosByStatusStatistics.forEach(s -> {
-			var name = Objects.isNull(s.getKey())? "In permanent storage": s.getKey();
+			var name = Objects.isNull(s.getKey()) ? "In permanent storage" : s.getKey();
 			var item = new DataSeriesItem(name, s.getValue());
 //							if (Objects.isNull(s.getKey())) item.setSliced(true);
 			pieSeries.add(item);
@@ -78,7 +78,7 @@ public class DashboardView extends Div implements RouterLayout {
 		chartSPLine.setTimeline(true);
 
 		Configuration configuration = chartSPLine.getConfiguration();
-		configuration.getTooltip().setEnabled(true);	// подписываем точку на графике
+		configuration.getTooltip().setEnabled(true);    // подписываем точку на графике
 
 		DataSeries dataSeries = new DataSeries();
 		dataSeries.setName("Photos by date");

@@ -8,8 +8,8 @@ import lombok.ToString;
 @Builder
 @ToString
 public class ReadableGeoInfo {
-    String country;
-    String locality;
-    String address;
-    String poi;
+	String country;
+	String locality;
+	String address;
+	String poi;
 }

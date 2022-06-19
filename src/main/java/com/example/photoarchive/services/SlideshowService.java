@@ -9,12 +9,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public interface SlideshowService {
-    void next(RingRandomSequence sequence, BiConsumer<StreamResource, Photo> consumer);
-    void current(RingRandomSequence sequence, BiConsumer<StreamResource, Photo> consumer);
-    void previous(RingRandomSequence sequence, BiConsumer<StreamResource, Photo> consumer);
+	void next(RingRandomSequence sequence, BiConsumer<StreamResource, Photo> consumer);
 
-    LocalDateTime directoryIsLoadedAt();
-    RingRandomSequence makeSequence(); // todo sorting parameters
-    CompletableFuture<Void> reload();
-    boolean isEmpty();
+	void current(RingRandomSequence sequence, BiConsumer<StreamResource, Photo> consumer);
+
+	void previous(RingRandomSequence sequence, BiConsumer<StreamResource, Photo> consumer);
+
+	LocalDateTime directoryIsLoadedAt();
+
+	RingRandomSequence makeSequence(); // todo sorting parameters
+
+	CompletableFuture<Void> reload();
+
+	boolean isEmpty();
 }

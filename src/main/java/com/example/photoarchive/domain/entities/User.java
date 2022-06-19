@@ -13,12 +13,12 @@ import java.util.Set;
 @Data
 @Builder
 public class User {
-    @Id
-    @Email
-    private String username;
+	@Id
+	@Email
+	private String username;
 
-    @JsonIgnore
-    private String password;
+	@JsonIgnore
+	private String password;
 
-    private Set<Role> roles;
+	private Set<Role> roles;
 }

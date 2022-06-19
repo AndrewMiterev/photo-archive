@@ -12,18 +12,18 @@ import java.time.LocalDateTime;
 @Builder
 @Document
 public class Photo {
-    @Id
-    private String hash;
-    private String name;
-    private String folder;
-    private Original original;
-    private String status;
-    private ExifData exifData;
-    @ToString.Exclude()
-    private String geocode;
-    private ReadableGeoInfo geoInfo;
-    private PredictName predict;
-    private String user;
-    private LocalDateTime date;
-    private String title;
+	@Id
+	private String hash;
+	private String name;
+	private String folder;
+	private Original original;
+	private String status;
+	private ExifData exifData;
+	@ToString.Exclude()
+	private String geocode;
+	private ReadableGeoInfo geoInfo;
+	private PredictName predict;
+	private String user;
+	private LocalDateTime date;
+	private String title;
 }

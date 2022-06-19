@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 @Builder
 @Document
 public class Protocol {
-    @Transient
-    public static final String SEQUENCE_NAME = "protocols";
+	@Transient
+	public static final String SEQUENCE_NAME = "protocols";
 
-    @Id
-    long id;
-    private LocalDateTime date;
-    private String type;
-    private String message;
+	@Id
+	long id;
+	private LocalDateTime date;
+	private String type;
+	private String message;
 }

@@ -88,7 +88,7 @@ public class ManualView extends VerticalLayout {
 //				.set("height", "100%")
 		;
 		video.setControls(true);
-		imageDiv.add(image,video);
+		imageDiv.add(image, video);
 		var imageDescription = new VerticalLayout();
 		photoCard.add(imageDiv, imageDescription);
 
@@ -109,14 +109,14 @@ public class ManualView extends VerticalLayout {
 		imageDescription.add(new HorizontalLayout(originalPhotoDateText, originalPhotoDateSpan));
 
 		consumer = (stream, photo) -> getUI().ifPresent(ui -> ui.access(() -> {
-			video.getStyle().set("display","none");
-			image.getStyle().set("display","none");
+			video.getStyle().set("display", "none");
+			image.getStyle().set("display", "none");
 
-			if(photo.getOriginal().getMime().equalsIgnoreCase("video/quicktime")) {
+			if (photo.getOriginal().getMime().equalsIgnoreCase("video/quicktime")) {
 				video.getStyle().set("display", "block");
 				video.setSource(stream);
 			} else {
-				image.getStyle().set("display","block");
+				image.getStyle().set("display", "block");
 				image.getElement().setAttribute("src", stream)
 						.setAttribute("alt", photo.getName())
 						.setAttribute("title", photo.getName())
@@ -145,7 +145,7 @@ public class ManualView extends VerticalLayout {
 		Button nextButton = new Button("Next", e -> {
 			photoNumber++;
 			if (photoNumber >= list.size()) photoNumber = 0;
-			photo=list.get(photoNumber);
+			photo = list.get(photoNumber);
 			fileService.callConsumerOnLoad(consumer, photo, fileService.readPhotoDataAsync(photo));
 		});
 		buttons.add(nextButton);

@@ -40,7 +40,7 @@ public class RobotServiceImpl implements RobotService {
 		executor = Executors.newFixedThreadPool(properties.getProcessingThreads());
 	}
 
-//	@Scheduled(fixedDelayString = "${photo-archive.processing-load-delay-in-milliseconds:0}",
+	//	@Scheduled(fixedDelayString = "${photo-archive.processing-load-delay-in-milliseconds:0}",
 //			initialDelayString = "${photo-archive.processing-load-initial-delay-in-milliseconds:0}")
 	@Override
 	public void load() {
@@ -58,16 +58,16 @@ public class RobotServiceImpl implements RobotService {
 		}, executor);
 	}
 
-//	@Scheduled(fixedDelayString = "${photo-archive.processing-tick-delay-in-milliseconds:0}",
+	//	@Scheduled(fixedDelayString = "${photo-archive.processing-tick-delay-in-milliseconds:0}",
 //			initialDelayString = "${photo-archive.processing-tick-initial-delay-in-milliseconds:0}")
 	@Override
 	public void tick() {
 		var onePhotoProcess = CompletableFuture.runAsync(() ->
-			notReadyPhotos.stream()
-					.filter(hash -> !workOnIt.contains(hash))
-					.findAny()
-					.ifPresent(this::process)
-		, executor);
+						notReadyPhotos.stream()
+								.filter(hash -> !workOnIt.contains(hash))
+								.findAny()
+								.ifPresent(this::process)
+				, executor);
 	}
 
 	private void process(String photoHash) {
@@ -123,7 +123,7 @@ public class RobotServiceImpl implements RobotService {
 	public Integer executorUsage() {
 		if (executor instanceof ThreadPoolExecutor pool) {
 			log.debug("pool.getActiveCount() {{}}", pool.getActiveCount());
-			log.debug("not ready photos {{}} {{}}",notReadyPhotos.size(),workOnIt.size());
+			log.debug("not ready photos {{}} {{}}", notReadyPhotos.size(), workOnIt.size());
 			return pool.getActiveCount();
 		}
 		return 0;

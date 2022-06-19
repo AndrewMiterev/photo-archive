@@ -21,20 +21,20 @@ public class SettingView extends VerticalLayout
 //        button.setText(getTranslation("btn.key"));
 //    }
 
-    public SettingView(I18NProvider provider) {
+	public SettingView(I18NProvider provider) {
 
 //        button.getStyle();
 //        button.setText(getTranslation("btn.key"));
 //        button.addClickListener(e -> Notification.show(getTranslation("clicked")));
 
-        ComboBox<Locale> localeComboBox = new ComboBox<>();
-        localeComboBox.setItems(provider.getProvidedLocales());
-        localeComboBox.setValue(VaadinSession.getCurrent().getLocale());
-        localeComboBox.addValueChangeListener(e -> {
-            VaadinSession.getCurrent().setLocale(e.getValue());
-        });
-        add(localeComboBox);
+		ComboBox<Locale> localeComboBox = new ComboBox<>();
+		localeComboBox.setItems(provider.getProvidedLocales());
+		localeComboBox.setValue(VaadinSession.getCurrent().getLocale());
+		localeComboBox.addValueChangeListener(e -> {
+			VaadinSession.getCurrent().setLocale(e.getValue());
+		});
+		add(localeComboBox);
 //        add(button);
-    }
+	}
 
 }
