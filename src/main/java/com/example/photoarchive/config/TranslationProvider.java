@@ -13,25 +13,25 @@ import java.util.ResourceBundle;
 @Log4j2
 @Component
 public class TranslationProvider implements I18NProvider {
-    @Override
-    public List<Locale> getProvidedLocales() {
-        return List.of(
-                new Locale("en"),
-                new Locale("ru")
-        );
-    }
+	@Override
+	public List<Locale> getProvidedLocales() {
+		return List.of(
+				new Locale("en"),
+				new Locale("ru")
+		);
+	}
 
-    @Override
-    public String getTranslation(String key, Locale locale, Object... params) {
-        try {
-            final ResourceBundle bundle = ResourceBundle.getBundle("translation", locale);
-            String value = bundle.getString(key);
-            if (params.length > 0)
-                value = MessageFormat.format(value, params);
-            return value;
-        } catch (MissingResourceException e) {
-            log.warn("No translation parameter {} for locale {}", key, locale);
-            return key;
-        }
-    }
+	@Override
+	public String getTranslation(String key, Locale locale, Object... params) {
+		try {
+			final ResourceBundle bundle = ResourceBundle.getBundle("translation", locale);
+			String value = bundle.getString(key);
+			if (params.length > 0)
+				value = MessageFormat.format(value, params);
+			return value;
+		} catch (MissingResourceException e) {
+			log.warn("No translation parameter {} for locale {}", key, locale);
+			return key;
+		}
+	}
 }

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @ToString
 @Getter
 public class ExifData {
-    private Geo geo;
-    private LocalDateTime date;
-    private String camera;
+	private Geo geo;
+	private LocalDateTime date;
+	private String camera;
 }
